@@ -18,6 +18,7 @@ def main():
 	ap.add_argument("genes", type=str)
 	ap.add_argument("proteins", type=str)
 	ap.add_argument("cog_db", type=str)
+	ap.add_argument("cpus", type=int, default=4)
 	
 	args = ap.parse_args()
 
