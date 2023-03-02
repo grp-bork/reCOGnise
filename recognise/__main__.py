@@ -18,7 +18,7 @@ def main():
 	ap.add_argument("genes", type=str)
 	ap.add_argument("proteins", type=str)
 	ap.add_argument("cog_db", type=str)
-	ap.add_argument("cpus", type=int, default=4)
+	ap.add_argument("--cpus", type=int, default=4)
 	
 	args = ap.parse_args()
 
@@ -28,7 +28,9 @@ def main():
 			"fetchMGs.pl",
 			"-o", f"{args.genome_id}_cogs",
 			"-t", f"{args.cpus}",
-			"-d", f"{args.genes}", f"{args.proteins}"
+			"-m", "extraction",
+			"-d", f"{args.genes}",
+			f"{args.proteins}",
 		],
 		stdout=subprocess.PIPE, stderr=subprocess.PIPE      
 	)    
