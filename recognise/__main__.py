@@ -95,9 +95,10 @@ def main():
 	
 	print(*("\t".join(line) for line in speci_header), sep="\n")
 	for cog in COGS:
-		cog_line = speci_cog_d.get(cog)
-		if cog_line:
-			print("\t".join(cog_line))
+		cog_lines = speci_cog_d.get(cog)
+		if cog_lines is not None:
+			for line in cog_lines:
+				print("\t".join(line))
 		
 
 
