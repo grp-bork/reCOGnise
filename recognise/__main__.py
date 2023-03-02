@@ -1,0 +1,123 @@
+import argparse
+import subprocess
+import sys
+
+SPECI_COGS = """
+	COG0012 COG0016 COG0018 COG0048 COG0049 COG0052 COG0080 COG0081
+	COG0085 COG0087 COG0088 COG0090 COG0091 COG0092 COG0093 COG0094
+	COG0096 COG0097 COG0098 COG0099 COG0100 COG0102 COG0103 COG0124
+	COG0172 COG0184 COG0185 COG0186 COG0197 COG0200 COG0201 COG0202
+	COG0215 COG0256 COG0495 COG0522 COG0525 COG0533 COG0541 COG0552
+""".strip().split(" ")
+
+
+def main():
+	
+	ap = argparse.ArgumentParser()
+	ap.add_argument("genome_id", type=str)
+	ap.add_argument("genes", type=str)
+	ap.add_argument("proteins", type=str)
+	ap.add_argument("cog_db", type=str)
+	
+	args = ap.parse_args()
+
+	# fetchMG.pl -o \${bin_id}_cogs -t 5 -m extraction -d genecalls/\${bin_id}.extracted.fna genecalls/\${bin_id}.extracted.faa
+	fetchmg_proc = subprocess.Popen(
+		[
+			"fetchMG.pl",
+			"-o", f"{args.genome_id}_cogs",
+			"-t", f"{args.cpus}",
+			"-d", f"{args.genes}", f"{args.proteins}"
+		],
+		stdout=subprocess.PIPE, stderr=subprocess.PIPE      
+	)    
+
+	out, err = fetchmg_proc.communicate()
+	
+	
+
+if __name__ == "__main__":
+	main()
+
+	"""
+	mkdir ${sample_id}
+	mkdir mapseq
+
+	rsync -av ${params.cog_ref_dir} \$TMPDIR
+	cogdir=\$TMPDIR/
+
+	specicogs=(COG0012 COG0016 COG0018 COG0048 COG0049 COG0052 COG0080 COG0081
+			   COG0085 COG0087 COG0088 COG0090 COG0091 COG0092 COG0093 COG0094
+			   COG0096 COG0097 COG0098 COG0099 COG0100 COG0102 COG0103 COG0124
+			   COG0172 COG0184 COG0185 COG0186 COG0197 COG0200 COG0201 COG0202
+			   COG0215 COG0256 COG0495 COG0522 COG0525 COG0533 COG0541 COG0552)
+	motu_cogs=(COG0012 COG0016 COG0018 COG0172 COG0215
+			   COG0495 COG0525 COG0533 COG0541 COG0552)
+	i=0
+
+	echo -n "bin" > ${sample_id}/${sample_id}.cog_count
+	for cog in \${specicogs[@]}; do
+		echo -n "\t"\${cog} >> ${sample_id}/${sample_id}.cog_count
+	done
+
+	for bin in bins/*
+	do
+	  bin_id=\${bin:5:\${#bin}-8}
+	  if [[ -s genecalls/\${bin_id}.extracted.fna  ]]
+	  then
+		fetchMG.pl -o \${bin_id}_cogs -t 5 -m extraction -d genecalls/\${bin_id}.extracted.fna genecalls/\${bin_id}.extracted.faa
+
+		mkdir mapseq/\${bin_id}
+		mkdir mapseq/\${bin_id}/motu
+		mkdir mapseq/\${bin_id}/speci
+
+		# SPECI
+		for cog in \${specicogs[@]}; do
+			if [[ -s \${bin_id}_cogs/\${cog}.fna ]]
+			then
+				sed -i '/>/ s/\$/ '" # \${cog} \${bin_id}"'/' \${bin_id}_cogs/\${cog}.fna
+				((i=++i%6)) || wait
+				mapseq \${bin_id}_cogs/\${cog}.fna \${cogdir}\${cog}.fna \${cogdir}\${cog}.specI.tax | sed "s/#query/#cog\tquery/" | sed "1,2 ! s/^/\${cog}\t&/" > mapseq/\${bin_id}/speci/\${cog} &
+			else
+				touch mapseq/\${bin_id}/speci/\${cog}
+			fi
+		done
+		wait
+		cat mapseq/\${bin_id}/speci/* | sed '3,\${ /^#/d }' > ${sample_id}/\${bin_id}.speci.assignments
+		i=0
+		# MOTU
+		for cog in \${motu_cogs[@]}; do
+			if [[ -s \${bin_id}_cogs/\${cog}.fna ]]
+			then
+				((i=++i%6)) || wait
+				mapseq \${bin_id}_cogs/\${cog}.fna \${cogdir}\${cog}.mOTU.fna \${cogdir}\${cog}.mOTU.tax | sed "s/#query/#cog\tquery/" | sed "1,2 ! s/^/\${cog}\t&/" > mapseq/\${bin_id}/motu/\${cog} &
+			else
+				touch mapseq/\${bin_id}/motu/\${cog}
+			fi
+		done
+		wait
+		cat mapseq/\${bin_id}/motu/* | sed '3,\${ /^#/d }' > ${sample_id}/\${bin_id}.motu.assignments
+
+		# SUMMARISE AND CLEANUP
+		cat \${bin_id}_cogs/*.fna >> ${sample_id}/${sample_id}.marker_genes.fna
+		taxonomy_annotation.py -m ${sample_id}/\${bin_id}.motu.assignments -s ${sample_id}/\${bin_id}.speci.assignments -o \${bin_id}.taxonomy_annotation -p \${bin_id}
+
+		# GET COG COUNTS
+		echo -n "\n"\${bin_id} >> ${sample_id}/${sample_id}.cog_count
+		for cog in \${specicogs[@]}; do
+			echo -n "\t"`grep -c \${cog} <(cat \${bin_id}_cogs/*.fna)` >> ${sample_id}/${sample_id}.cog_count
+		done
+		echo >> ${sample_id}/${sample_id}.cog_count
+	  else
+	  echo "No genecalls for \${bin_id}"
+	  fi
+	done
+
+	echo "name\ttaxon_level\ttaxonomic_assignment\tassignment_confidence\tconfident_count\tother_confident_count\tunconfident_count\tother_unconfident_count\tunique_marker_genes\ttotal_marker_genes\tchimerism_score_all\tchimerism_score_confident\tari_all\tari_confident" > ${sample_id}.taxonomy_annotation.tsv
+	cat *.taxonomy_annotation >> ${sample_id}.taxonomy_annotation.tsv
+
+	gzip ${sample_id}/${sample_id}.marker_genes.fna
+	mkdir ${sample_id}_assignments
+	mv ${sample_id}/*.assignments ${sample_id}_assignments/
+	tar -cvzf ${sample_id}/${sample_id}.assignments.tar.gz ${sample_id}_assignments/*.assignments
+	"""
