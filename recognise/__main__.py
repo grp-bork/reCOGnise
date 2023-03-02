@@ -1,6 +1,9 @@
 import argparse
+import os
+import re
 import subprocess
 import sys
+
 
 SPECI_COGS = """
 	COG0012 COG0016 COG0018 COG0048 COG0049 COG0052 COG0080 COG0081
@@ -22,11 +25,13 @@ def main():
 	
 	args = ap.parse_args()
 
+	cog_dir = f"{args.genome_id}_cogs",
+
 	# fetchMG.pl -o \${bin_id}_cogs -t 5 -m extraction -d genecalls/\${bin_id}.extracted.fna genecalls/\${bin_id}.extracted.faa
 	fetchmg_proc = subprocess.Popen(
 		[
 			"fetchMGs.pl",
-			"-o", f"{args.genome_id}_cogs",
+			"-o", cog_dir,
 			"-t", f"{args.cpus}",
 			"-m", "extraction",
 			"-d", f"{args.genes}",
@@ -38,6 +43,33 @@ def main():
 	out, err = fetchmg_proc.communicate()
 
 	print(out.decode())
+
+	align_file = os.path.join(cog_dir, "dummy.fna")
+
+	for cog in SPECI_COGS:
+		cog_file = os.path.join(cog_dir, f"{cog}.fna")
+		if os.path.isfile(cog_file):
+			with open(align_file, "wt") as aln_file, open(cog_file, "rt") as cog_in:
+				for line in cog_in:
+					if line[0] == ">":
+						line = re.sub(r"$", f"  # {cog} {args.genome_id}", line.strip())
+					print(line.strip(), file=aln_file)
+			break
+
+
+	"""
+	for cog in \${specicogs[@]}; do
+			if [[ -s \${bin_id}_cogs/\${cog}.fna ]]
+			then
+				sed -i '/>/ s/\$/ '" # \${cog} \${bin_id}"'/' \${bin_id}_cogs/\${cog}.fna
+				((i=++i%6)) || wait
+				mapseq \${bin_id}_cogs/\${cog}.fna \${cogdir}\${cog}.fna \${cogdir}\${cog}.specI.tax | sed "s/#query/#cog\tquery/" | sed "1,2 ! s/^/\${cog}\t&/" > mapseq/\${bin_id}/speci/\${cog} &
+			else
+				touch mapseq/\${bin_id}/speci/\${cog}
+			fi
+		done
+	"""
+		
 	
 	
 
