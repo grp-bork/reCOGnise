@@ -93,11 +93,11 @@ def main():
 
 			# break
 	
-	print(*speci_header, sep="\n")
+	print(*("\t".join(line) for line in speci_header), sep="\n")
 	for cog in COGS:
 		cog_line = speci_cog_d.get(cog)
 		if cog_line:
-			print(*cog_line)
+			print("\t".join(cog_line))
 		
 
 
