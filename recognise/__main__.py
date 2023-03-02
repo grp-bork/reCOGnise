@@ -84,10 +84,13 @@ def main():
 			out, err = mapseq_pr.communicate()
 
 			out = out.decode().strip().split("\n")
-			if speci_header is None:
+			if speci_header is None:				
 				speci_header = [line.strip().split("\t") for line in out if line[0] == "#"]
+				speci_header[-1].insert(0, "cog")
 
 			speci_cog_d[cog] = [line.strip().split("\t") for line in out if line[0] != "#"]
+			for line in speci_cog_d[cog]:
+				line.insert(0, cog)
 			
 			# cat mapseq/\${bin_id}/speci/* | sed '3,\${ /^#/d }' > ${sample_id}/\${bin_id}.speci.assignments
 
