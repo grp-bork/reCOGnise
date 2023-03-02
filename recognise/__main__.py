@@ -54,7 +54,7 @@ def main():
 
 	out, err = fetchmg_proc.communicate()
 
-	print(out.decode())
+	# print(out.decode())
 
 	align_file = os.path.join(cog_dir, "dummy.fna")
 
