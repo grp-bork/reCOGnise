@@ -24,7 +24,7 @@ def main():
 	# fetchMG.pl -o \${bin_id}_cogs -t 5 -m extraction -d genecalls/\${bin_id}.extracted.fna genecalls/\${bin_id}.extracted.faa
 	fetchmg_proc = subprocess.Popen(
 		[
-			"fetchMG.pl",
+			"fetchMGs.pl",
 			"-o", f"{args.genome_id}_cogs",
 			"-t", f"{args.cpus}",
 			"-d", f"{args.genes}", f"{args.proteins}"
@@ -33,6 +33,8 @@ def main():
 	)    
 
 	out, err = fetchmg_proc.communicate()
+
+	print(out.decode())
 	
 	
 
