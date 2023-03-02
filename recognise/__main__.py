@@ -13,6 +13,18 @@ SPECI_COGS = """
 	COG0215 COG0256 COG0495 COG0522 COG0525 COG0533 COG0541 COG0552
 """.strip().split(" ")
 
+MOTU_COGS = set(
+    """
+	COG0012 COG0016 COG0018 COG0172 COG0215
+	COG0495 COG0525 COG0533 COG0541 COG0552
+	""".strip().split(" ")
+)
+
+COGS = {
+	cog: cog in MOTU_COGS
+	for cog in SPECI_COGS
+}
+
 
 def main():
 	
@@ -37,7 +49,7 @@ def main():
 			"-d", f"{args.genes}",
 			f"{args.proteins}",
 		],
-		stdout=subprocess.PIPE, stderr=subprocess.PIPE      
+		stdout=subprocess.PIPE, stderr=subprocess.PIPE,     
 	)    
 
 	out, err = fetchmg_proc.communicate()
@@ -46,7 +58,10 @@ def main():
 
 	align_file = os.path.join(cog_dir, "dummy.fna")
 
-	for cog in SPECI_COGS:
+	speci_cog_d = {}
+	speci_header = None
+
+	for cog in COGS:
 		cog_file = os.path.join(cog_dir, f"{cog}.fna")
 		if os.path.isfile(cog_file):
 			with open(align_file, "wt") as aln_file, open(cog_file, "rt") as cog_in:
@@ -54,7 +69,36 @@ def main():
 					if line[0] == ">":
 						line = re.sub(r"$", f"  # {cog} {args.genome_id}", line.strip())
 					print(line.strip(), file=aln_file)
-			break
+
+
+			mapseq_pr = subprocess.Popen(
+				[
+					"mapseq",
+					align_file,
+					os.path.join(args.cog_db, f"{cog}.fna"),
+					os.path.join(args.cog_db, f"{cog}.specI.tax"),					
+				],
+				stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+			)
+
+			out, err = mapseq_pr.communicate()
+
+			out = out.decode().strip().split("\n")
+			if speci_header is None:
+				speci_header = [line.strip().split("\t") for line in out if line[0] == "#"]
+
+			speci_cog_d[cog] = [line.strip().split("\t") for line in out if line[0] != "#"]
+			
+			# cat mapseq/\${bin_id}/speci/* | sed '3,\${ /^#/d }' > ${sample_id}/\${bin_id}.speci.assignments
+
+			# break
+	
+	print(*speci_header, sep="\n")
+	for cog in COGS:
+		cog_line = speci_cog_d.get(cog)
+		if cog_line:
+			print(*cog_line)
+		
 
 
 	"""
