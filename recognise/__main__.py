@@ -25,7 +25,7 @@ def main():
 	
 	args = ap.parse_args()
 
-	cog_dir = f"{args.genome_id}_cogs",
+	cog_dir = f"{args.genome_id}_cogs"
 
 	# fetchMG.pl -o \${bin_id}_cogs -t 5 -m extraction -d genecalls/\${bin_id}.extracted.fna genecalls/\${bin_id}.extracted.faa
 	fetchmg_proc = subprocess.Popen(
