@@ -125,7 +125,7 @@ def main():
 			if cog_lines is not None:
 				for line in cog_lines:
 					print("\t".join(line), file=cogs_out)
-					specis[line[13]] += 1
+					specis[line[14]] += 1
 		
 		speci_counts = specis.most_common()
 		if not speci_counts:
