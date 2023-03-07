@@ -127,14 +127,16 @@ def main():
 					print("\t".join(line), file=cogs_out)
 					specis[line[14]] += 1
 		
+		
 		speci_counts = specis.most_common()
+		print(speci_counts)
 		if not speci_counts:
 			print("Warning: could not find any markers. Aborting.")
 			print("NO_MARKERS", file=speci_status_out)
 		else:
 			first, *second = speci_counts[:2]
 
-			if not second or first[1] > second[1]:
+			if (not second) or (first[1] > second[1]):
 				n_seqs = -1
 				if dbstr is not None:					
 					n_seqs = get_sequences_from_cluster(dbstr, first[0], seqfile)
