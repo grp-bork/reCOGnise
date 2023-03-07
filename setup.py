@@ -39,7 +39,9 @@ with open(path.join(here, "DESCRIPTION.md"), encoding="utf-8") as description:
 		zip_safe=False,
 		keywords="taxonomy assignment",
 		packages=find_packages(exclude=["test"]),
-		install_requires=[],
+		install_requires=[
+			"pymongo",
+		],
 		entry_points={
 			"console_scripts": [
 				"recognise=recognise.__main__:main",

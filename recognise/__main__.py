@@ -1,8 +1,11 @@
 import argparse
 import os
+import pathlib
 import re
 import subprocess
 import sys
+
+from collections import Counter
 
 
 SPECI_COGS = """
@@ -34,8 +37,12 @@ def main():
 	ap.add_argument("proteins", type=str)
 	ap.add_argument("cog_db", type=str)
 	ap.add_argument("--cpus", type=int, default=4)
+	ap.add_argument("--output_dir", "-o", type=str, default="recognise_out")
 	
 	args = ap.parse_args()
+
+
+	pathlib.Path(args.output_dir).mkdir(exist_ok=True, parents=True)
 
 	cog_dir = f"{args.genome_id}_cogs"
 
@@ -95,14 +102,37 @@ def main():
 			# cat mapseq/\${bin_id}/speci/* | sed '3,\${ /^#/d }' > ${sample_id}/\${bin_id}.speci.assignments
 
 			# break
-	
-	print(*("\t".join(line) for line in speci_header), sep="\n")
-	for cog in COGS:
-		cog_lines = speci_cog_d.get(cog)
-		if cog_lines is not None:
-			for line in cog_lines:
-				print("\t".join(line))
+
+	cogs_out = open(os.path.join(args.output_dir, f"{args.genome_id}.cogs.txt"), "wt")
+	speci_out = open(os.path.join(args.output_dir, f"{args.genome_id}.specI.txt"), "wt")
+	speci_status_out = open(os.path.join(args.output_dir, f"{args.genome_id}.specI.status"), "wt")
+	with cogs_out, speci_out, speci_status_out:
+		specis = Counter()
+		print(*("\t".join(line) for line in speci_header), sep="\n", file=cogs_out)
+		for cog in COGS:
+			cog_lines = speci_cog_d.get(cog)
+			if cog_lines is not None:
+				for line in cog_lines:
+					print("\t".join(line), file=cogs_out)
+					specis[line[13]] += 1
 		
+		speci_counts = specis.most_common()
+		if not speci_counts:
+			print("Warning: could not find any markers. Aborting.")
+			print("NO_MARKERS", file=speci_status_out)
+		else:
+			first, *second = speci_counts[:2]
+			if not second or first[1] > second[1]:
+				print("OK", file=speci_status_out)
+				open(speci_status_out.name + ".OK", "wt").close()
+				print(first[0], file=speci_out)
+			else:
+				print(f"Warning: cannot determine consensus specI. first={first} second={second}. Aborting.")
+				print("NO_CONSENSUS", file=speci_status_out)
+
+
+
+
 
 
 	"""
