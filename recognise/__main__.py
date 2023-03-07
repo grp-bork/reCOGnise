@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import pathlib
 import re
@@ -6,6 +7,8 @@ import subprocess
 import sys
 
 from collections import Counter
+
+from .db.queries import get_sequences_from_cluster
 
 
 SPECI_COGS = """
@@ -38,9 +41,14 @@ def main():
 	ap.add_argument("cog_db", type=str)
 	ap.add_argument("--cpus", type=int, default=4)
 	ap.add_argument("--output_dir", "-o", type=str, default="recognise_out")
+	ap.add_argument("--dbcred", type=str)
 	
 	args = ap.parse_args()
 
+	try:
+		dbstr = json.load(open(args.dbcred, "rt")).get("DB_STR")
+	except:
+		dbstr = None
 
 	pathlib.Path(args.output_dir).mkdir(exist_ok=True, parents=True)
 
@@ -106,6 +114,9 @@ def main():
 	cogs_out = open(os.path.join(args.output_dir, f"{args.genome_id}.cogs.txt"), "wt")
 	speci_out = open(os.path.join(args.output_dir, f"{args.genome_id}.specI.txt"), "wt")
 	speci_status_out = open(os.path.join(args.output_dir, f"{args.genome_id}.specI.status"), "wt")
+	seqfile = os.path.join(args.output_dir, f"{args.genome_id}.specI.ffn.gz")
+	open(seqfile, "wt").close()
+
 	with cogs_out, speci_out, speci_status_out:
 		specis = Counter()
 		print(*("\t".join(line) for line in speci_header), sep="\n", file=cogs_out)
@@ -122,10 +133,21 @@ def main():
 			print("NO_MARKERS", file=speci_status_out)
 		else:
 			first, *second = speci_counts[:2]
+
 			if not second or first[1] > second[1]:
-				print("OK", file=speci_status_out)
-				open(speci_status_out.name + ".OK", "wt").close()
+				n_seqs = -1
+				if dbstr is not None:					
+					n_seqs = get_sequences_from_cluster(dbstr, first[0], seqfile)
+
 				print(first[0], file=speci_out)
+
+				if not n_seqs:
+					print("Warning: specI cluster is too small. Aborting.")
+					print("SPECI_SIZE_INSUFFICIENT", file=speci_status_out)
+				else:
+					print("OK", file=speci_status_out)
+					open(speci_status_out.name + ".OK", "wt").close()
+
 			else:
 				print(f"Warning: cannot determine consensus specI. first={first} second={second}. Aborting.")
 				print("NO_CONSENSUS", file=speci_status_out)
