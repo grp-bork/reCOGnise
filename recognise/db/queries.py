@@ -9,7 +9,7 @@ def get_sequences_from_cluster(mongo_db_str, cluster_id, seqfile):
 	fr_db = client["progenomes"]
 
 	n_genes = 0
-	files = 
+	files = []
 	with gzip.open(seqfile, "wt") as genes_out:
 		for record in fr_db.samples.find({'fr13_cluster': cluster_id}):
 			genes_file = f"{record['analysis_path']}/ref_genome_called_genes/{record['sample_id']}.genes.fa.gz"
