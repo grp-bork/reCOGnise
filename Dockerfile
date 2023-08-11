@@ -4,6 +4,7 @@ LABEL maintainer="cschu1981@gmail.com"
 LABEL version="0.1"
 LABEL description="This is a Docker Image for the reCOGnise tool."
 
+
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt update
