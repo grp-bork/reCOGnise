@@ -1,9 +1,12 @@
 import gzip
 
-import pymongo
-
 
 def get_sequences_from_cluster(mongo_db_str, cluster_id, seqfile):
+
+	try:
+		import pymongo
+	except ImportError:
+		return 0
 
 	client = pymongo.MongoClient(mongo_db_str,)
 	fr_db = client["progenomes"]
