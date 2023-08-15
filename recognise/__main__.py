@@ -52,7 +52,7 @@ def main():
 	if genome_present:
 		if genes_present or proteins_present:
 			raise ValueError("Please specify either a genome or a gene/protein set combination.")
-		genome = args.genome
+		
 		# call prodigal
 		proteins = os.path.join(args.output_dir, f"{args.genome_id}.faa")
 		genes = os.path.join(args.output_dir, f"{args.genome_id}.ffn")
@@ -66,7 +66,7 @@ def main():
 				proteins,
 				"-d",
 				genes,
-			]
+			], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
 		)
 		out, err = prodigal_proc.communicate()
 	elif genes_present and proteins_present:
