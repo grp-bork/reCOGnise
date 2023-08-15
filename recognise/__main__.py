@@ -58,7 +58,7 @@ def main():
 		# call prodigal
 		proteins = os.path.join(args.output_dir, f"{args.genome_id}.faa")
 		genes = os.path.join(args.output_dir, f"{args.genome_id}.ffn")
-		prodigal_proc = subprocess.Popen(
+		prodigal_proc = subprocess.run(
 			[
 				# prodigal -i \$(basename ${genome_fna} .gz) -f gff -o ${genome_id}/${genome_id}.gff -a ${genome_id}/${genome_id}.faa -d ${genome_id}/${genome_id}.ffn
 				"prodigal",
@@ -68,9 +68,14 @@ def main():
 				proteins,
 				"-d",
 				genes,
-			], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+			], stdout=subprocess.PIPE, stderr=subprocess.stdout,
 		)
-		out, err = prodigal_proc.communicate()
+		# out, err = prodigal_proc.communicate()
+
+		if prodigal_proc.returncode != 0:
+			raise ValueError(f"<pre>Prodigal error\n\n{prodigal_proc.stdout}</pre>")
+
+
 	elif genes_present and proteins_present:
 		genes, proteins = args.genes, args.proteins
 	elif genes_present:
