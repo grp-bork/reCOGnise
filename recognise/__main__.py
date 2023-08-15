@@ -88,8 +88,9 @@ def main():
 	except:
 		dbstr = None
 
-
-	cog_dir = f"{args.genome_id}_cogs"
+	cog_dir = os.path.join(args.output_dir, "cogs")
+	# cog_dir = f"{args.genome_id}_cogs"
+	pathlib.Path(cog_dir).mkdir(exist_ok=True, parents=True)
 
 	# fetchMG.pl -o \${bin_id}_cogs -t 5 -m extraction -d genecalls/\${bin_id}.extracted.fna genecalls/\${bin_id}.extracted.faa
 	fetchmg_proc = subprocess.run(
@@ -106,7 +107,7 @@ def main():
 
 	# out, err = fetchmg_proc.communicate()
 	if fetchmg_proc.returncode != 0:
-		raise ValueError(f"<pre>Prodigal error\n\n{fetchmg_proc.stdout}</pre>")
+		raise ValueError(f"<pre>fetchMGs error\n\n{fetchmg_proc.stdout}</pre>")
 
 
 	# print(out.decode())
