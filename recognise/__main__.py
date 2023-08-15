@@ -49,6 +49,8 @@ def main():
 	genome_present, genes_present, proteins_present = (f is not None and os.path.isfile(f) for f in (args.genome, args.genes, args.proteins))
 	genes, proteins = None, None
 	
+	pathlib.Path(args.output_dir).mkdir(exist_ok=True, parents=True)
+	
 	if genome_present:
 		if genes_present or proteins_present:
 			raise ValueError("Please specify either a genome or a gene/protein set combination.")
@@ -81,7 +83,6 @@ def main():
 	except:
 		dbstr = None
 
-	pathlib.Path(args.output_dir).mkdir(exist_ok=True, parents=True)
 
 	cog_dir = f"{args.genome_id}_cogs"
 
