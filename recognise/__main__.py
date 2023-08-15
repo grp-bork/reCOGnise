@@ -46,7 +46,7 @@ def main():
 	
 	args = ap.parse_args()
 
-	genome_present, genes_present, proteins_present = (os.path.isfile(f) for f in (args.genome, args.genes, args.proteins))
+	genome_present, genes_present, proteins_present = (f is not None and os.path.isfile(f) for f in (args.genome, args.genes, args.proteins))
 	genes, proteins = None, None
 	
 	if genome_present:
