@@ -92,7 +92,7 @@ def main():
 	cog_dir = f"{args.genome_id}_cogs"
 
 	# fetchMG.pl -o \${bin_id}_cogs -t 5 -m extraction -d genecalls/\${bin_id}.extracted.fna genecalls/\${bin_id}.extracted.faa
-	fetchmg_proc = subprocess.Popen(
+	fetchmg_proc = subprocess.run(
 		[
 			"fetchMGs.pl",
 			"-o", cog_dir,
@@ -104,7 +104,10 @@ def main():
 		stdout=subprocess.PIPE, stderr=subprocess.PIPE,     
 	)    
 
-	out, err = fetchmg_proc.communicate()
+	# out, err = fetchmg_proc.communicate()
+	if fetchmg_proc.returncode != 0:
+		raise ValueError(f"<pre>Prodigal error\n\n{fetchmg_proc.stdout}</pre>")
+
 
 	# print(out.decode())
 
