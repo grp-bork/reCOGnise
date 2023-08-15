@@ -36,14 +36,45 @@ def main():
 	
 	ap = argparse.ArgumentParser()
 	ap.add_argument("genome_id", type=str)
-	ap.add_argument("genes", type=str)
-	ap.add_argument("proteins", type=str)
+	ap.add_argument("--genes", type=str)
+	ap.add_argument("--proteins", type=str)
+	ap.add_argument("--genome", type=str)
 	ap.add_argument("cog_db", type=str)
 	ap.add_argument("--cpus", type=int, default=4)
 	ap.add_argument("--output_dir", "-o", type=str, default="recognise_out")
 	ap.add_argument("--dbcred", type=str)
 	
 	args = ap.parse_args()
+
+	genome_present, genes_present, proteins_present = (os.path.isfile(f) for f in (args.genome, args.genes, args.proteins))
+	genes, proteins = None, None
+	
+	if genome_present:
+		if genes_present or proteins_present:
+			raise ValueError("Please specify either a genome or a gene/protein set combination.")
+		genome = args.genome
+		# call prodigal
+		proteins = os.path.join(args.output_dir, f"{genome_id}.faa")
+		genes = os.path.join(args.output_dir, f"{genome_id}.ffn")
+		prodigal_proc = subprocess.Popen(
+			[
+				# prodigal -i \$(basename ${genome_fna} .gz) -f gff -o ${genome_id}/${genome_id}.gff -a ${genome_id}/${genome_id}.faa -d ${genome_id}/${genome_id}.ffn
+				"prodigal",
+				"-i",
+				args.genome,
+				"-a",
+				proteins,
+				"-d",
+				genes,
+			]
+		)
+		out, err = prodigal_proc.communicate()
+	elif genes_present and proteins_present:
+		genes, proteins = args.genes, args.proteins
+	elif genes_present:
+		raise ValueError("Missing protein set, please specify with --proteins.")
+	elif proteins_present:
+		raise ValueError("Missing gene set, please specify with --genes.")
 
 	try:
 		dbstr = json.load(open(args.dbcred, "rt")).get("DB_STR")
@@ -61,8 +92,8 @@ def main():
 			"-o", cog_dir,
 			"-t", f"{args.cpus}",
 			"-m", "extraction",
-			"-d", f"{args.genes}",
-			f"{args.proteins}",
+			"-d", f"{genes}",
+			f"{proteins}",
 		],
 		stdout=subprocess.PIPE, stderr=subprocess.PIPE,     
 	)    
