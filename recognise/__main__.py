@@ -88,7 +88,7 @@ def main():
 	except:
 		dbstr = None
 
-	cog_dir = os.path.join(args.output_dir, "cogs")
+	# cog_dir = os.path.join(args.output_dir, "cogs")
 	# cog_dir = f"{args.genome_id}_cogs"
 	pathlib.Path(cog_dir).mkdir(exist_ok=True, parents=True)
 
@@ -98,6 +98,7 @@ def main():
 		"-o", cog_dir,
 		"-t", f"{args.cpus}",
 		"-m", "extraction",
+		"-x", "/usr/bin",
 		"-d", f"{genes}",
 		f"{proteins}",
 	]
