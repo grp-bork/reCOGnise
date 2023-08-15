@@ -93,21 +93,22 @@ def main():
 	pathlib.Path(cog_dir).mkdir(exist_ok=True, parents=True)
 
 	# fetchMG.pl -o \${bin_id}_cogs -t 5 -m extraction -d genecalls/\${bin_id}.extracted.fna genecalls/\${bin_id}.extracted.faa
+	fetchmg_cmd = [
+		"fetchMGs.pl",
+		"-o", cog_dir,
+		"-t", f"{args.cpus}",
+		"-m", "extraction",
+		"-d", f"{genes}",
+		f"{proteins}",
+	]
 	fetchmg_proc = subprocess.run(
-		[
-			"fetchMGs.pl",
-			"-o", cog_dir,
-			"-t", f"{args.cpus}",
-			"-m", "extraction",
-			"-d", f"{genes}",
-			f"{proteins}",
-		],
+		fetchmg_cmd,
 		stdout=subprocess.PIPE, stderr=subprocess.PIPE,     
 	)    
 
 	# out, err = fetchmg_proc.communicate()
 	if fetchmg_proc.returncode != 0:
-		raise ValueError(f"<pre>fetchMGs error\n\n{fetchmg_proc.stdout}</pre>")
+		raise ValueError(f"<pre>fetchMGs error\n\n{' '.join(fetchmg_cmd)}\n\n{fetchmg_proc.stdout.decode()}</pre>")
 
 
 	# print(out.decode())
