@@ -150,7 +150,8 @@ def main():
 
 	with cogs_out, speci_out, speci_status_out:
 		specis = Counter()
-		print(*("\t".join(line) for line in speci_header), sep="\n", file=cogs_out)
+		if speci_header:
+			print(*("\t".join(line) for line in speci_header), sep="\n", file=cogs_out)
 		for cog in COGS:
 			cog_lines = speci_cog_d.get(cog)
 			if cog_lines is not None:
