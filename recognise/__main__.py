@@ -88,9 +88,9 @@ def main():
 	except:
 		dbstr = None
 
-	# cog_dir = os.path.join(args.output_dir, "cogs")
+	cog_dir = os.path.join(args.output_dir, "cogs")
 	# cog_dir = f"{args.genome_id}_cogs"
-	pathlib.Path(cog_dir).mkdir(exist_ok=True, parents=True)
+	# pathlib.Path(cog_dir).mkdir(exist_ok=True, parents=True)
 
 	# fetchMG.pl -o \${bin_id}_cogs -t 5 -m extraction -d genecalls/\${bin_id}.extracted.fna genecalls/\${bin_id}.extracted.faa
 	fetchmg_cmd = [
