@@ -54,8 +54,8 @@ def main():
 			raise ValueError("Please specify either a genome or a gene/protein set combination.")
 		genome = args.genome
 		# call prodigal
-		proteins = os.path.join(args.output_dir, f"{genome_id}.faa")
-		genes = os.path.join(args.output_dir, f"{genome_id}.ffn")
+		proteins = os.path.join(args.output_dir, f"{args.genome_id}.faa")
+		genes = os.path.join(args.output_dir, f"{args.genome_id}.ffn")
 		prodigal_proc = subprocess.Popen(
 			[
 				# prodigal -i \$(basename ${genome_fna} .gz) -f gff -o ${genome_id}/${genome_id}.gff -a ${genome_id}/${genome_id}.faa -d ${genome_id}/${genome_id}.ffn
