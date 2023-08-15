@@ -68,7 +68,7 @@ def main():
 				proteins,
 				"-d",
 				genes,
-			], stdout=subprocess.PIPE, stderr=subprocess.stdout,
+			], stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
 		)
 		# out, err = prodigal_proc.communicate()
 
