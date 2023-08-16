@@ -145,31 +145,58 @@ def main():
 	speci_header = None
 	specis = Counter()
 
+	def task(cog_file, cog, genome_id, cog_db):
+		with open(cog_file + ".align", "wt") as aln_file, open(cog_file, "rt") as cog_in:
+			for line in cog_in:
+				if line[0] == ">":
+					line = re.sub(r"$", f"  # {cog} {genome_id}", line.strip())
+				print(line.strip(), file=aln_file)
+		
+		_, cog_lines = call_mapseq(aln_file, cog_db, cog)
+		return cog_lines
+
+
+	import multiprocessing as mp
 	with open(os.path.join(args.output_dir, f"{args.genome_id}.cogs.txt"), "wt") as cogs_out:
-		for cog in COGS:
-			if args.marker_set == "motus" and not COGS[cog]:
+		print(
+			("cog", "query", "dbhit",	"bitscore", "identity",	"matches", "mismatches", "gaps", "query_start", "query_end", "dbhit_start",	"dbhit_end", "strand",	"specI_only:specI_cluster",	"combined_cf", "score_cf",),
+			sep="\t", file=cogs_out, flush=True
+		)
+
+		tasks = []
+		for cog, is_motus_cog in COGS.items():
+			if args.marker_set == "motus" and not is_motus_cog:
 				continue
 			cog_file = os.path.join(cog_dir, f"{cog}.fna")
 			if os.path.isfile(cog_file):
-				with open(align_file, "wt") as aln_file, open(cog_file, "rt") as cog_in:
-					for line in cog_in:
-						if line[0] == ">":
-							line = re.sub(r"$", f"  # {cog} {args.genome_id}", line.strip())
-						print(line.strip(), file=aln_file)
+				tasks.append((cog_file, cog, args.genome_id, args.cog_db))
 
-				speci_header_, cog_lines = call_mapseq(
-					align_file, args.cog_db, cog, speci_header=None,
-				)
+		with mp.Pool() as pool:
+			results = pool.apply_async(task, args=tasks)
 
-				if speci_header is None:
-					speci_header = speci_header_
-					print(*("\t".join(line) for line in speci_header), sep="\n", file=cogs_out)
-				
-				if cog_lines is not None:
-					for line in cog_lines:
-						print("\t".join(line), file=cogs_out)
-						specis[line[14]] += 1
-					cogs_out.flush()
+		print(results)
+		
+
+		# for cog in COGS:
+		# 	if args.marker_set == "motus" and not COGS[cog]:
+		# 		continue
+		# 	cog_file = os.path.join(cog_dir, f"{cog}.fna")
+		# 	if os.path.isfile(cog_file):
+		# 		with open(align_file, "wt") as aln_file, open(cog_file, "rt") as cog_in:
+		# 			for line in cog_in:
+		# 				if line[0] == ">":
+		# 					line = re.sub(r"$", f"  # {cog} {args.genome_id}", line.strip())
+		# 				print(line.strip(), file=aln_file)
+
+		# 		_, cog_lines = call_mapseq(
+		# 			align_file, args.cog_db, cog, speci_header=None,
+		# 		)
+
+		# 		if cog_lines is not None:
+		# 			for line in cog_lines:
+		# 				print("\t".join(line), file=cogs_out)
+		# 				specis[line[14]] += 1
+		# 			cogs_out.flush()
 
 
 				# mapseq_pr = subprocess.Popen(
