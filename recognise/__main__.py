@@ -1,5 +1,7 @@
 import argparse
+import itertools as it
 import json
+import multiprocessing as mp
 import os
 import pathlib
 import re
@@ -155,25 +157,27 @@ def main():
 	speci_header = None
 	specis = Counter()
 
-	import multiprocessing as mp
+	tasks = []
+	for cog, is_motus_cog in COGS.items():
+		if args.marker_set == "motus" and not is_motus_cog:
+			continue
+		cog_file = os.path.join(cog_dir, f"{cog}.fna")
+		if os.path.isfile(cog_file):
+			tasks.append((cog_file, cog, args.genome_id, args.cog_db))
+
+	with mp.Pool() as pool:
+		results = it.chain(*pool.starmap_async(task, tasks).get())
+
+	# print(results)
+
 	with open(os.path.join(args.output_dir, f"{args.genome_id}.cogs.txt"), "wt") as cogs_out:
 		print(
 			("cog", "query", "dbhit",	"bitscore", "identity",	"matches", "mismatches", "gaps", "query_start", "query_end", "dbhit_start",	"dbhit_end", "strand",	"specI_only:specI_cluster",	"combined_cf", "score_cf",),
 			sep="\t", file=cogs_out, flush=True
 		)
-
-		tasks = []
-		for cog, is_motus_cog in COGS.items():
-			if args.marker_set == "motus" and not is_motus_cog:
-				continue
-			cog_file = os.path.join(cog_dir, f"{cog}.fna")
-			if os.path.isfile(cog_file):
-				tasks.append((cog_file, cog, args.genome_id, args.cog_db))
-
-		with mp.Pool() as pool:
-			results = pool.starmap_async(task, tasks).get()
-
-		print(results)
+		for line in results:
+			print("\t".join(line), file=cogs_out)
+			specis[line[14]] += 1 
 		
 
 		# for cog in COGS:
