@@ -93,6 +93,16 @@ def call_mapseq(align_file, cog_db, cog, speci_header=None):
 
 	return speci_header, speci_cog
 
+def task(cog_file, cog, genome_id, cog_db):
+	with open(cog_file + ".align", "wt") as aln_file, open(cog_file, "rt") as cog_in:
+		for line in cog_in:
+			if line[0] == ">":
+				line = re.sub(r"$", f"  # {cog} {genome_id}", line.strip())
+			print(line.strip(), file=aln_file)
+	
+	_, cog_lines = call_mapseq(aln_file, cog_db, cog)
+	return cog_lines
+
 
 def main():
 	
@@ -144,17 +154,6 @@ def main():
 	speci_cog_d = {}
 	speci_header = None
 	specis = Counter()
-
-	def task(cog_file, cog, genome_id, cog_db):
-		with open(cog_file + ".align", "wt") as aln_file, open(cog_file, "rt") as cog_in:
-			for line in cog_in:
-				if line[0] == ">":
-					line = re.sub(r"$", f"  # {cog} {genome_id}", line.strip())
-				print(line.strip(), file=aln_file)
-		
-		_, cog_lines = call_mapseq(aln_file, cog_db, cog)
-		return cog_lines
-
 
 	import multiprocessing as mp
 	with open(os.path.join(args.output_dir, f"{args.genome_id}.cogs.txt"), "wt") as cogs_out:
