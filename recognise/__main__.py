@@ -171,7 +171,7 @@ def main():
 				tasks.append((cog_file, cog, args.genome_id, args.cog_db))
 
 		with mp.Pool() as pool:
-			results = pool.apply_async(task, args=tasks).get()
+			results = pool.starmap_async(task, args=tasks).get()
 
 		print(results)
 		
