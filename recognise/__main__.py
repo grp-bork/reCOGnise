@@ -100,7 +100,7 @@ def task(cog_file, cog, genome_id, cog_db):
 				line = re.sub(r"$", f"  # {cog} {genome_id}", line.strip())
 			print(line.strip(), file=aln_file)
 	
-	_, cog_lines = call_mapseq(aln_file, cog_db, cog)
+	_, cog_lines = call_mapseq(cog_file + ".align", cog_db, cog)
 	return cog_lines
 
 
