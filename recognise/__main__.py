@@ -89,9 +89,7 @@ def call_mapseq(align_file, cog_db, cog, speci_header=None):
 		speci_header = [line.strip().split("\t") for line in out if line[0] == "#"]
 		speci_header[-1].insert(0, "cog")
 
-	speci_cog = [line.strip().split("\t") for line in out if line[0] != "#"]
-	for line in speci_cog_d:
-		line.insert(0, cog)
+	speci_cog = [[cog] + (line.strip().split("\t")) for line in out if line[0] != "#"]	
 
 	return speci_header, speci_cog
 
