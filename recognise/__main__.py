@@ -32,6 +32,70 @@ COGS = {
 }
 
 
+def call_prodigal(genome, protein_file, gene_file):
+	# prodigal -i \$(basename ${genome_fna} .gz) -f gff -o ${genome_id}/${genome_id}.gff -a ${genome_id}/${genome_id}.faa -d ${genome_id}/${genome_id}.ffn
+	prodigal_proc = subprocess.run(
+		[
+			"prodigal",
+			"-i",
+			genome,
+			"-a",
+			protein_file,
+			"-d",
+			gene_file,
+		],
+		stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+	)
+	
+	if prodigal_proc.returncode != 0:
+		raise ValueError(f"<pre>Prodigal error\n\n{prodigal_proc.stdout}</pre>")
+	
+
+def call_fetch_mgs(protein_file, gene_file, cog_dir, cpus):
+	# fetchMG.pl -o \${bin_id}_cogs -t 5 -m extraction -d genecalls/\${bin_id}.extracted.fna genecalls/\${bin_id}.extracted.faa
+	fetchmgs_cmd = [
+		"fetchMGs.pl",
+		"-o", cog_dir,
+		"-t", f"{cpus}",
+		"-m", "extraction",
+		"-x", "/usr/bin",
+		"-d", f"{gene_file}",
+		f"{protein_file}",
+	]		
+	fetchmg_proc = subprocess.run(
+		fetchmgs_cmd,
+		stdout=subprocess.PIPE, stderr=subprocess.STDOUT,     
+	)
+	    
+	if fetchmg_proc.returncode != 0:
+		raise ValueError(f"<pre>fetchMGs error\n\n{' '.join(fetchmgs_cmd)}\n\n{fetchmgs_proc.stdout.decode()}</pre>")
+
+
+def call_mapseq(align_file, cog_db, cog, speci_header=None):
+	mapseq_pr = subprocess.Popen(
+		[
+			"mapseq",
+			align_file,
+			os.path.join(cog_db, f"{cog}.fna"),
+			os.path.join(cog_db, f"{cog}.specI.tax"),					
+		],
+		stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+	)
+
+	out, err = mapseq_pr.communicate()
+	out = out.decode().strip().split("\n")
+
+	if speci_header is None:				
+		speci_header = [line.strip().split("\t") for line in out if line[0] == "#"]
+		speci_header[-1].insert(0, "cog")
+
+	speci_cog = [line.strip().split("\t") for line in out if line[0] != "#"]
+	for line in speci_cog_d:
+		line.insert(0, cog)
+
+	return speci_header, speci_cog
+
+
 def main():
 	
 	ap = argparse.ArgumentParser()
@@ -55,26 +119,10 @@ def main():
 		if genes_present or proteins_present:
 			raise ValueError("Please specify either a genome or a gene/protein set combination.")
 		
-		# call prodigal
 		proteins = os.path.join(args.output_dir, f"{args.genome_id}.faa")
 		genes = os.path.join(args.output_dir, f"{args.genome_id}.ffn")
-		prodigal_proc = subprocess.run(
-			[
-				# prodigal -i \$(basename ${genome_fna} .gz) -f gff -o ${genome_id}/${genome_id}.gff -a ${genome_id}/${genome_id}.faa -d ${genome_id}/${genome_id}.ffn
-				"prodigal",
-				"-i",
-				args.genome,
-				"-a",
-				proteins,
-				"-d",
-				genes,
-			], stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-		)
-		# out, err = prodigal_proc.communicate()
 
-		if prodigal_proc.returncode != 0:
-			raise ValueError(f"<pre>Prodigal error\n\n{prodigal_proc.stdout}</pre>")
-
+		call_prodigal(args.genome, proteins, genes)	
 
 	elif genes_present and proteins_present:
 		genes, proteins = args.genes, args.proteins
@@ -89,87 +137,80 @@ def main():
 		dbstr = None
 
 	cog_dir = os.path.join(args.output_dir, "cogs")
-	# cog_dir = f"{args.genome_id}_cogs"
-	# pathlib.Path(cog_dir).mkdir(exist_ok=True, parents=True)
-
-	# fetchMG.pl -o \${bin_id}_cogs -t 5 -m extraction -d genecalls/\${bin_id}.extracted.fna genecalls/\${bin_id}.extracted.faa
-	fetchmg_cmd = [
-		"fetchMGs.pl",
-		"-o", cog_dir,
-		"-t", f"{args.cpus}",
-		"-m", "extraction",
-		"-x", "/usr/bin",
-		"-d", f"{genes}",
-		f"{proteins}",
-	]
-	fetchmg_proc = subprocess.run(
-		fetchmg_cmd,
-		stdout=subprocess.PIPE, stderr=subprocess.PIPE,     
-	)    
-
-	# out, err = fetchmg_proc.communicate()
-	if fetchmg_proc.returncode != 0:
-		raise ValueError(f"<pre>fetchMGs error\n\n{' '.join(fetchmg_cmd)}\n\n{fetchmg_proc.stdout.decode()}</pre>")
-
-
-	# print(out.decode())
+	
+	call_fetch_mgs(proteins, genes, cog_dir, args.cpus)
 
 	align_file = os.path.join(cog_dir, "dummy.fna")
 
 	speci_cog_d = {}
 	speci_header = None
+	specis = Counter()
 
-	for cog in COGS:
-		cog_file = os.path.join(cog_dir, f"{cog}.fna")
-		if os.path.isfile(cog_file):
-			with open(align_file, "wt") as aln_file, open(cog_file, "rt") as cog_in:
-				for line in cog_in:
-					if line[0] == ">":
-						line = re.sub(r"$", f"  # {cog} {args.genome_id}", line.strip())
-					print(line.strip(), file=aln_file)
+	with open(os.path.join(args.output_dir, f"{args.genome_id}.cogs.txt"), "wt") as cogs_out:
+		for cog in COGS:
+			cog_file = os.path.join(cog_dir, f"{cog}.fna")
+			if os.path.isfile(cog_file):
+				with open(align_file, "wt") as aln_file, open(cog_file, "rt") as cog_in:
+					for line in cog_in:
+						if line[0] == ">":
+							line = re.sub(r"$", f"  # {cog} {args.genome_id}", line.strip())
+						print(line.strip(), file=aln_file)
+
+				speci_header_, cog_lines = call_mapseq(
+					align_file, args.cog_db, cog, speci_header=None,
+				)
+
+				if speci_header is None:
+					speci_header = speci_header_
+					print(*("\t".join(line) for line in speci_header), sep="\n", file=cogs_out)
+				
+				if cog_lines is not None:
+					for line in cog_lines:
+						print("\t".join(line), file=cogs_out)
+						specis[line[14]] += 1
+					cogs_out.flush()
 
 
-			mapseq_pr = subprocess.Popen(
-				[
-					"mapseq",
-					align_file,
-					os.path.join(args.cog_db, f"{cog}.fna"),
-					os.path.join(args.cog_db, f"{cog}.specI.tax"),					
-				],
-				stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-			)
+				# mapseq_pr = subprocess.Popen(
+				# 	[
+				# 		"mapseq",
+				# 		align_file,
+				# 		os.path.join(args.cog_db, f"{cog}.fna"),
+				# 		os.path.join(args.cog_db, f"{cog}.specI.tax"),					
+				# 	],
+				# 	stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+				# )
 
-			out, err = mapseq_pr.communicate()
+				# out, err = mapseq_pr.communicate()
 
-			out = out.decode().strip().split("\n")
-			if speci_header is None:				
-				speci_header = [line.strip().split("\t") for line in out if line[0] == "#"]
-				speci_header[-1].insert(0, "cog")
+				# out = out.decode().strip().split("\n")
+				# if speci_header is None:				
+				# 	speci_header = [line.strip().split("\t") for line in out if line[0] == "#"]
+				# 	speci_header[-1].insert(0, "cog")
 
-			speci_cog_d[cog] = [line.strip().split("\t") for line in out if line[0] != "#"]
-			for line in speci_cog_d[cog]:
-				line.insert(0, cog)
-			
-			# cat mapseq/\${bin_id}/speci/* | sed '3,\${ /^#/d }' > ${sample_id}/\${bin_id}.speci.assignments
+				# speci_cog_d[cog] = [line.strip().split("\t") for line in out if line[0] != "#"]
+				# for line in speci_cog_d[cog]:
+				# 	line.insert(0, cog)
+				
+				# cat mapseq/\${bin_id}/speci/* | sed '3,\${ /^#/d }' > ${sample_id}/\${bin_id}.speci.assignments
 
-			# break
+				# break
 
-	cogs_out = open(os.path.join(args.output_dir, f"{args.genome_id}.cogs.txt"), "wt")
 	speci_out = open(os.path.join(args.output_dir, f"{args.genome_id}.specI.txt"), "wt")
 	speci_status_out = open(os.path.join(args.output_dir, f"{args.genome_id}.specI.status"), "wt")
 	seqfile = os.path.join(args.output_dir, f"{args.genome_id}.specI.ffn.gz")
 	open(seqfile, "wt").close()
 
-	with cogs_out, speci_out, speci_status_out:
-		specis = Counter()
-		if speci_header:
-			print(*("\t".join(line) for line in speci_header), sep="\n", file=cogs_out)
-		for cog in COGS:
-			cog_lines = speci_cog_d.get(cog)
-			if cog_lines is not None:
-				for line in cog_lines:
-					print("\t".join(line), file=cogs_out)
-					specis[line[14]] += 1
+	with speci_out, speci_status_out:
+		# specis = Counter()
+		# if speci_header:
+		# 	print(*("\t".join(line) for line in speci_header), sep="\n", file=cogs_out)
+		# for cog in COGS:
+		# 	cog_lines = speci_cog_d.get(cog)
+		# 	if cog_lines is not None:
+		# 		for line in cog_lines:
+		# 			print("\t".join(line), file=cogs_out)
+		# 			specis[line[14]] += 1
 		
 		
 		speci_counts = specis.most_common()
