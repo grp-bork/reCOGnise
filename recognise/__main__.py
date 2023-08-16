@@ -105,6 +105,7 @@ def main():
 	ap.add_argument("--cpus", type=int, default=4)
 	ap.add_argument("--output_dir", "-o", type=str, default="recognise_out")
 	ap.add_argument("--dbcred", type=str)
+	ap.add_argument("--marker_set", type=str, choices=("full", "motus"), default="motus")
 	
 	args = ap.parse_args()
 
@@ -146,6 +147,8 @@ def main():
 
 	with open(os.path.join(args.output_dir, f"{args.genome_id}.cogs.txt"), "wt") as cogs_out:
 		for cog in COGS:
+			if args.marker_set == "motus" and not COGS[cog]:
+				continue
 			cog_file = os.path.join(cog_dir, f"{cog}.fna")
 			if os.path.isfile(cog_file):
 				with open(align_file, "wt") as aln_file, open(cog_file, "rt") as cog_in:
