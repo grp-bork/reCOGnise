@@ -64,12 +64,12 @@ def call_fetch_mgs(protein_file, gene_file, cog_dir, cpus):
 		"-d", f"{gene_file}",
 		f"{protein_file}",
 	]		
-	fetchmg_proc = subprocess.run(
+	fetchmgs_proc = subprocess.run(
 		fetchmgs_cmd,
 		stdout=subprocess.PIPE, stderr=subprocess.STDOUT,     
 	)
 	    
-	if fetchmg_proc.returncode != 0:
+	if fetchmgs_proc.returncode != 0:
 		raise ValueError(f"<pre>fetchMGs error\n\n{' '.join(fetchmgs_cmd)}\n\n{fetchmgs_proc.stdout.decode()}</pre>")
 
 
