@@ -11,7 +11,7 @@ import sys
 from collections import Counter
 
 from .db.queries import get_sequences_from_cluster
-from tasks import task
+from .tasks.mapseq import task
 
 
 SPECI_COGS = """
