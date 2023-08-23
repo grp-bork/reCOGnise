@@ -181,11 +181,11 @@ def main():
 			continue
 		cog_file = os.path.join(cog_dir, f"{cog}.fna")
 		if os.path.isfile(cog_file):
-			tasks.append((cog_file, cog, args.genome_id, args.cog_db))
+			tasks.append((cog_file, cog, args.genome_id, args.cog_db, min(args.cpus, 4)))
 
-	logger.info(f"Running {args.cpus} MAPseq processes on {len(tasks)} marker genes. marker_set={args.marker_set}...")
+	logger.info(f"Running {args.cpus // min(args.cpus, 4)} MAPseq processes on {len(tasks)} marker genes. marker_set={args.marker_set}...")
 
-	with mp.Pool(args.cpus) as pool:
+	with mp.Pool(args.cpus // min(args.cpus, 4)) as pool:
 		results = list(it.chain(*pool.starmap_async(task, tasks).get()))
 
 	# print(results)
