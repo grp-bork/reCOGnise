@@ -186,9 +186,10 @@ def main():
 	logger.info(f"Running {args.cpus // min(args.cpus, 4)} MAPseq processes on {len(tasks)} marker genes. marker_set={args.marker_set}...")
 
 	with mp.Pool(args.cpus // min(args.cpus, 4)) as pool:
-		results = list(it.chain(*pool.starmap_async(task, tasks).get()))
+		# results = list(it.chain(*pool.starmap_async(task, tasks).get()))
+		results = list(pool.starmap_async(task, tasks).get())
 
-	# print(results)
+	print(results)
 	logger.info("MAPseq finished.")
 
 	with open(os.path.join(args.output_dir, f"{args.genome_id}.cogs.txt"), "wt") as cogs_out:
