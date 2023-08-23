@@ -85,15 +85,20 @@ def call_mapseq(align_file, cog_db, cog, speci_header=None):
 	)
 
 	out, err = mapseq_pr.communicate()
-	out = out.decode().strip().split("\n")
 
-	if speci_header is None:				
-		speci_header = [line.strip().split("\t") for line in out if line[0] == "#"]
-		speci_header[-1].insert(0, "cog")
+	msg, speci_header, speci_cog = None, None, None
+	if mapseq_pr.returncode != 0:
+		msg = err.decode().strip().split("\n")
+	else:
+		out = out.decode().strip().split("\n")
 
-	speci_cog = [[cog] + (line.strip().split("\t")) for line in out if line[0] != "#"]	
+		if speci_header is None:				
+			speci_header = [line.strip().split("\t") for line in out if line[0] == "#"]
+			speci_header[-1].insert(0, "cog")
 
-	return speci_header, speci_cog
+		speci_cog = [[cog] + (line.strip().split("\t")) for line in out if line[0] != "#"]	
+
+	return msg, speci_header, speci_cog
 
 def task(cog_file, cog, genome_id, cog_db):
 	with open(cog_file + ".align", "wt") as aln_file, open(cog_file, "rt") as cog_in:
@@ -102,8 +107,8 @@ def task(cog_file, cog, genome_id, cog_db):
 				line = re.sub(r"$", f"  # {cog} {genome_id}", line.strip())
 			print(line.strip(), file=aln_file)
 	
-	_, cog_lines = call_mapseq(cog_file + ".align", cog_db, cog)
-	return cog_lines
+	msg, _, cog_lines = call_mapseq(cog_file + ".align", cog_db, cog)
+	return msg, cog_lines
 
 
 def main():
@@ -175,7 +180,9 @@ def main():
 			("cog", "query", "dbhit",	"bitscore", "identity",	"matches", "mismatches", "gaps", "query_start", "query_end", "dbhit_start",	"dbhit_end", "strand",	"specI_only:specI_cluster",	"combined_cf", "score_cf",),
 			sep="\t", file=cogs_out, flush=True
 		)
-		for line in results:
+		for msg, line in results:
+			if msg is not None:
+				raise ValueError(f"{msg}")
 			print("\t".join(line), file=cogs_out)
 			specis[line[14]] += 1 
 		
