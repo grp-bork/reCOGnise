@@ -165,7 +165,7 @@ def main():
 
 	cog_dir = os.path.join(args.output_dir, "cogs")
 	
-	logger.info("Calling fetchMGs...")
+	logger.info("Running fetchMGs...")
 	call_fetch_mgs(proteins, genes, cog_dir, args.cpus)
 	logger.info("fetchMGs finished.")
 
@@ -189,17 +189,20 @@ def main():
 		# results = list(it.chain(*pool.starmap_async(task, tasks).get()))
 		results = list(pool.starmap_async(task, tasks).get())
 
-	print(results)
 	logger.info("MAPseq finished.")
+
+	print(results)
+
+	messages, output_lines = zip(*results)
+	if any(msg is not None for msg in messages):
+		raise ValueError(f"{'\n'.join(map(str, messages)}")
 
 	with open(os.path.join(args.output_dir, f"{args.genome_id}.cogs.txt"), "wt") as cogs_out:
 		print(
 			("cog", "query", "dbhit",	"bitscore", "identity",	"matches", "mismatches", "gaps", "query_start", "query_end", "dbhit_start",	"dbhit_end", "strand",	"specI_only:specI_cluster",	"combined_cf", "score_cf",),
 			sep="\t", file=cogs_out, flush=True
 		)
-		for msg, line in results:
-			if msg is not None:
-				raise ValueError(f"{msg}")
+		for line in it.chain(*output_lines):
 			print("\t".join(line), file=cogs_out)
 			specis[line[14]] += 1 
 		

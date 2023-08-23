@@ -19,7 +19,7 @@ def call_mapseq(align_file, cog_db, cog, threads=4, speci_header=None):
 
 	msg, speci_header, speci_cog = None, None, None
 	if mapseq_pr.returncode != 0:
-		msg = mapseq_pr.stdout
+		msg = mapseq_pr.stdout.decode().strip()
 	else:
 		out = mapseq_pr.stdout.decode().strip().split("\n") #out.decode().strip().split("\n")
 
