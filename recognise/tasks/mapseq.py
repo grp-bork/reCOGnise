@@ -4,23 +4,23 @@ import subprocess
 
 
 def call_mapseq(align_file, cog_db, cog, speci_header=None):
-	mapseq_pr = subprocess.Popen(
+	mapseq_pr = subprocess.run(
 		[
 			"mapseq",
 			align_file,
 			os.path.join(cog_db, f"{cog}.fna"),
 			os.path.join(cog_db, f"{cog}.specI.tax"),					
 		],
-		stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+		stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
 	)
 
-	out, err = mapseq_pr.communicate()
+	# out, err = mapseq_pr.communicate()
 
 	msg, speci_header, speci_cog = None, None, None
 	if mapseq_pr.returncode != 0:
-		msg = err.decode().strip().split("\n")
+		msg = mapseq_pr.stdout
 	else:
-		out = out.decode().strip().split("\n")
+		out = mapseq_pr.stdout.decode().strip().split("\n") #out.decode().strip().split("\n")
 
 		if speci_header is None:				
 			speci_header = [line.strip().split("\t") for line in out if line[0] == "#"]
