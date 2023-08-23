@@ -9,7 +9,7 @@ def call_mapseq(align_file, cog_db, cog, speci_header=None):
 			"mapseq",
 			align_file,
 			os.path.join(cog_db, f"{cog}.fna"),
-			os.path.join(cog_db, f"{cog}.specI.tax"),					
+			os.path.join(cog_db, f"{cog}.specI.tax"),							
 		],
 		stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
 	)

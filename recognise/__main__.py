@@ -1,6 +1,7 @@
 import argparse
 import itertools as it
 import json
+import logging
 import multiprocessing as mp
 import os
 import pathlib
@@ -13,6 +14,13 @@ from collections import Counter
 from .db.queries import get_sequences_from_cluster
 from .tasks.mapseq import task
 
+
+logging.basicConfig(
+	level=logging.DEBUG,
+	format='[%(asctime)s] %(message)s'
+)
+
+logger = logging.getLogger(__name__)
 
 SPECI_COGS = """
 	COG0012 COG0016 COG0018 COG0048 COG0049 COG0052 COG0080 COG0081
@@ -133,13 +141,15 @@ def main():
 	pathlib.Path(args.output_dir).mkdir(exist_ok=True, parents=True)
 	
 	if genome_present:
+		logger.info("Running prodigal...")
 		if genes_present or proteins_present:
 			raise ValueError("Please specify either a genome or a gene/protein set combination.")
 		
 		proteins = os.path.join(args.output_dir, f"{args.genome_id}.faa")
 		genes = os.path.join(args.output_dir, f"{args.genome_id}.ffn")
 
-		call_prodigal(args.genome, proteins, genes)	
+		call_prodigal(args.genome, proteins, genes)
+		logger.info("prodigal finished.")
 
 	elif genes_present and proteins_present:
 		genes, proteins = args.genes, args.proteins
@@ -155,7 +165,9 @@ def main():
 
 	cog_dir = os.path.join(args.output_dir, "cogs")
 	
+	logger.info("Calling fetchMGs...")
 	call_fetch_mgs(proteins, genes, cog_dir, args.cpus)
+	logger.info("fetchMGs finished.")
 
 	align_file = os.path.join(cog_dir, "dummy.fna")
 
@@ -171,10 +183,13 @@ def main():
 		if os.path.isfile(cog_file):
 			tasks.append((cog_file, cog, args.genome_id, args.cog_db))
 
-	with mp.Pool() as pool:
+	logger.info(f"Running {args.cpus} MAPseq processes on {len(tasks)} marker genes. marker_set={args.marker_set}...")
+
+	with mp.Pool(args.cpus) as pool:
 		results = list(it.chain(*pool.starmap_async(task, tasks).get()))
 
 	# print(results)
+	logger.info("MAPseq finished.")
 
 	with open(os.path.join(args.output_dir, f"{args.genome_id}.cogs.txt"), "wt") as cogs_out:
 		print(
