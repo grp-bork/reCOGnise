@@ -194,8 +194,9 @@ def main():
 	print(results)
 
 	messages, output_lines = zip(*results)
-	if any(msg is not None for msg in messages):
-		raise ValueError(f"{'\n'.join(map(str, messages)}")
+	for msg in messages:
+		if msg is not None:
+			raise ValueError(f"{msg}")
 
 	with open(os.path.join(args.output_dir, f"{args.genome_id}.cogs.txt"), "wt") as cogs_out:
 		print(
