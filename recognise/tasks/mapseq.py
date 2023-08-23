@@ -7,7 +7,7 @@ def call_mapseq(align_file, cog_db, cog, threads=4, speci_header=None):
 	mapseq_pr = subprocess.run(
 		[
 			"mapseq",
-			"-nthreads", threads,
+			"-nthreads", f"{threads}",
 			align_file,
 			os.path.join(cog_db, f"{cog}.fna"),
 			os.path.join(cog_db, f"{cog}.specI.tax"),							
