@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 
 LABEL maintainer="cschu1981@gmail.com"
-LABEL version="0.1"
+LABEL version="0.4.4"
 LABEL description="This is a Docker Image for the reCOGnise tool."
 
 
@@ -10,13 +10,14 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt update
 RUN apt upgrade -y
 
-RUN apt install -y wget python3-pip git dirmngr gnupg ca-certificates build-essential libssl-dev libcurl4-gnutls-dev libxml2-dev libfontconfig1-dev libharfbuzz-dev libfribidi-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev
+RUN apt install -y wget python3-pip git dirmngr gnupg ca-certificates build-essential libssl-dev libcurl4-gnutls-dev libxml2-dev libfontconfig1-dev libharfbuzz-dev libfribidi-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev prodigal
 RUN apt clean
 
 RUN mkdir -p /opt/software && \
 	cd /opt/software && \
 	git clone https://github.com/cschu/reCOGnise.git && \
 	cd reCOGnise && \
+	git checkout feature/allow_genome_input_20230814 && \
 	pip install .
   
 RUN cd /opt/software && \
@@ -28,6 +29,10 @@ RUN cd /opt/software && \
 	ln -s /opt/software/mapseq/share /usr/bin/
 
 RUN cd /opt/software && \
-	git clone https://github.com/motu-tool/fetchMGs.git
+	git clone https://github.com/motu-tool/fetchMGs.git && \
+	ln -s /opt/software/fetchMGs/fetchMGs.pl /usr/bin/fetchMGs.pl && \
+	ln -s /opt/software/fetchMGs/bin/hmmsearch /usr/bin/hmmsearch && \
+	ln -s /opt/software/fetchMGs/bin/seqtk /usr/bin/seqtk && \
+	ln -s /opt/software/fetchMGs/lib /usr/bin/lib	
 
 CMD ["recognise"]
