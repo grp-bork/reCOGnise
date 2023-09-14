@@ -29,6 +29,9 @@ def call_mapseq(align_file, cog_db, cog, threads=4, speci_header=None):
 
 		speci_cog = [[cog] + (line.strip().split("\t")) for line in out if line[0] != "#"]	
 
+	with open(f"{align_file}.done", "wt", encoding="utf-8") as _out:
+		...
+
 	return msg, speci_header, speci_cog
 
 
