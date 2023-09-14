@@ -22,20 +22,18 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-SPECI_COGS = """
-	COG0012 COG0016 COG0018 COG0048 COG0049 COG0052 COG0080 COG0081
-	COG0085 COG0087 COG0088 COG0090 COG0091 COG0092 COG0093 COG0094
-	COG0096 COG0097 COG0098 COG0099 COG0100 COG0102 COG0103 COG0124
-	COG0172 COG0184 COG0185 COG0186 COG0197 COG0200 COG0201 COG0202
-	COG0215 COG0256 COG0495 COG0522 COG0525 COG0533 COG0541 COG0552
-""".strip().split(" ")
-
-MOTU_COGS = set(
-    """
-	COG0012 COG0016 COG0018 COG0172 COG0215
-	COG0495 COG0525 COG0533 COG0541 COG0552
-	""".strip().split(" ")
+SPECI_COGS = (
+	"COG0012", "COG0016", "COG0018", "COG0048", "COG0049", "COG0052", "COG0080", "COG0081",
+	"COG0085", "COG0087", "COG0088", "COG0090", "COG0091", "COG0092", "COG0093", "COG0094",
+	"COG0096", "COG0097", "COG0098", "COG0099", "COG0100", "COG0102", "COG0103", "COG0124",
+	"COG0172", "COG0184", "COG0185", "COG0186", "COG0197", "COG0200", "COG0201", "COG0202",
+	"COG0215", "COG0256", "COG0495", "COG0522", "COG0525", "COG0533", "COG0541", "COG0552",
 )
+
+MOTU_COGS = {
+	"COG0012", "COG0016", "COG0018", "COG0172", "COG0215",
+	"COG0495", "COG0525", "COG0533", "COG0541", "COG0552",
+}
 
 COGS = {
 	cog: cog in MOTU_COGS
@@ -200,7 +198,7 @@ def main():
 
 	with open(os.path.join(args.output_dir, f"{args.genome_id}.cogs.txt"), "wt") as cogs_out:
 		print(
-			("cog", "query", "dbhit",	"bitscore", "identity",	"matches", "mismatches", "gaps", "query_start", "query_end", "dbhit_start",	"dbhit_end", "strand",	"specI_only:specI_cluster",	"combined_cf", "score_cf",),
+			*("cog", "query", "dbhit",	"bitscore", "identity",	"matches", "mismatches", "gaps", "query_start", "query_end", "dbhit_start",	"dbhit_end", "strand",	"specI_only:specI_cluster",	"combined_cf", "score_cf",),
 			sep="\t", file=cogs_out, flush=True
 		)
 		for line in it.chain(*output_lines):
