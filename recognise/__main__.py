@@ -129,7 +129,7 @@ def main():
 	ap.add_argument("--cpus", type=int, default=4)
 	ap.add_argument("--output_dir", "-o", type=str, default="recognise_out")
 	ap.add_argument("--dbcred", type=str)
-	ap.add_argument("--marker_set", type=str, choices=("full", "motus"), default="motus")
+	ap.add_argument("--marker_set", type=str, choices=("full", "motus", "test"), default="motus")
 	
 	args = ap.parse_args()
 
@@ -177,6 +177,8 @@ def main():
 	for cog, is_motus_cog in COGS.items():
 		if args.marker_set == "motus" and not is_motus_cog:
 			continue
+		if len(tasks) == 3:
+			break
 		cog_file = os.path.join(cog_dir, f"{cog}.fna")
 		if os.path.isfile(cog_file):
 			tasks.append((cog_file, cog, args.genome_id, args.cog_db, min(args.cpus, 4)))
