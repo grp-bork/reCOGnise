@@ -177,7 +177,7 @@ def main():
 	for cog, is_motus_cog in COGS.items():
 		if args.marker_set == "motus" and not is_motus_cog:
 			continue
-		if len(tasks) == 3:
+		if args.marker_set == "test" and len(tasks) == 3:
 			break
 		cog_file = os.path.join(cog_dir, f"{cog}.fna")
 		if os.path.isfile(cog_file):
@@ -282,8 +282,10 @@ def main():
 
 			if (second is None) or (first[1] > second[1]):
 				n_seqs = -1
-				if dbstr is not None:					
+				if dbstr is not None:
+					print("Getting sequences from cluster:", first[0], seqfile, "...", end="")
 					n_seqs = get_sequences_from_cluster(dbstr, first[0], seqfile)
+					print(n_seqs)
 
 				print(first[0], file=speci_out)
 
