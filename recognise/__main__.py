@@ -157,9 +157,16 @@ def main():
 		raise ValueError("Missing gene set, please specify with --genes.")
 
 	try:
-		dbstr = json.load(open(args.dbcred, "rt")).get("DB_STR")
+		db_d = json.load(open(args.dbcred, "rt")).get("progenomes3_db")
 	except:
-		dbstr = None
+		db_d = {}
+
+	user = db_d.get("username")
+	host = db_d.get("host")
+	pw = db_d.get("password")
+	port = db_d.get("port")
+
+	dbstr = f"mongodb://{user}:{pw}@{host}:{port}" if (user and host and pw and port) else None
 
 	cog_dir = os.path.join(args.output_dir, "cogs")
 	
