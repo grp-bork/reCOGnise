@@ -201,7 +201,11 @@ def main():
 
 	print(results)
 
-	messages, output_lines = zip(*results)
+	try:
+		messages, output_lines = zip(*results)
+	except ValueError:
+		messages, output_lines = [], []
+
 	for msg in messages:
 		if msg is not None:
 			raise ValueError(f"{msg}")
