@@ -188,7 +188,7 @@ def main():
 		if args.marker_set == "test" and len(tasks) == 3:
 			break
 		cog_file = os.path.join(cog_dir, f"{cog}.fna")
-		if os.path.isfile(cog_file):
+		if os.path.isfile(cog_file) and os.stat(cog_file).st_size:
 			tasks.append((cog_file, cog, args.genome_id, args.cog_db, min(args.cpus, 4)))
 
 	logger.info(f"Running {args.cpus // min(args.cpus, 4)} MAPseq processes on {len(tasks)} marker genes. marker_set={args.marker_set}...")
