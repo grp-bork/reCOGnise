@@ -23,8 +23,7 @@ export PATH=$PATH:/opt/software/miniconda3/bin:/opt/software/fetchMGs:/opt/softw
   apt-get install -y tzdata
   dpkg-reconfigure --frontend noninteractive tzdata
 
-  apt-get install -y wget python3-pip git dirmngr gnupg ca-certificates build-essential libssl-dev libcurl4-gnutls-dev libxml2-dev libfontconfig1-dev libharfbuzz-dev libfribidi-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev hmmsearch seqtk prodigal
-
+  apt-get install -y wget python3-pip git dirmngr gnupg ca-certificates build-essential libssl-dev libcurl4-gnutls-dev libxml2-dev libfontconfig1-dev libharfbuzz-dev libfribidi-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev hmmer seqtk prodigal
   
   apt-get install gnupg
   wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | apt-key add -
@@ -53,3 +52,5 @@ export PATH=$PATH:/opt/software/miniconda3/bin:/opt/software/fetchMGs:/opt/softw
 	ln -s /opt/software/fetchMGs/bin/hmmsearch /usr/bin/hmmsearch && \
 	ln -s /opt/software/fetchMGs/bin/seqtk /usr/bin/seqtk && \
 	ln -s /opt/software/fetchMGs/lib /usr/bin/lib
+
+#trigger
