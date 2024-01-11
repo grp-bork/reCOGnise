@@ -157,6 +157,7 @@ def main():
 		raise ValueError("Missing gene set, please specify with --genes.")
 
 	try:
+		# dbstr = json.load(open(args.dbcred, "rt")).get("DB_STR")
 		db_d = json.load(open(args.dbcred, "rt")).get("progenomes3_db")
 	except:
 		db_d = {}
