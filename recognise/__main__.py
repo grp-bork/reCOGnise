@@ -6,6 +6,7 @@ import multiprocessing as mp
 import os
 import pathlib
 import re
+import shutil
 import subprocess
 import sys
 
@@ -130,6 +131,7 @@ def main():
 	ap.add_argument("--output_dir", "-o", type=str, default="recognise_out")
 	ap.add_argument("--dbcred", type=str)
 	ap.add_argument("--marker_set", type=str, choices=("full", "motus", "test"), default="motus")
+	ap.add_argument("--seq_cache", type=str)
 	
 	args = ap.parse_args()
 
@@ -294,7 +296,20 @@ def main():
 
 			if (second is None) or (first[1] > second[1]):
 				n_seqs = -1
-				if dbstr is not None:
+
+				if args.seq_cache and os.path.isdir(args.seq_cache):
+					print("Looking up seq_cache...")
+					expected_files = [
+						os.path.join(args.seq_cache, f"{first[0]}.{suffix}")
+						for suffix in (".genes.ffn.gz", ".genes.nseqs")
+					]
+					if all(os.path.isfile(f) and os.stat(f).st_size for f in expected_files):
+						n_seqs = int(open(os.path.join(args.seq_cache, f"{first[0]}.genes.nseqs")).read().strip())
+						print("Copying sequences from seq_cache:", first[0], seqfile, "...", end="")
+						shutil.copyfile(os.path.join(args.seq_cache, f"{first[0]}.genes.ffn.gz"), seqfile)
+						print(n_seqs)
+
+				if n_seqs == -1 and dbstr is not None:
 					print("Getting sequences from cluster:", first[0], seqfile, "...", end="")
 					n_seqs = get_sequences_from_cluster(dbstr, first[0], seqfile)
 					print(n_seqs)
