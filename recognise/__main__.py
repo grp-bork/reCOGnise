@@ -42,8 +42,11 @@ COGS = {
 }
 
 
-def call_prodigal(genome, protein_file, gene_file):
+def call_prodigal(genome, protein_file, gene_file, gff_file=None):
 	# prodigal -i \$(basename ${genome_fna} .gz) -f gff -o ${genome_id}/${genome_id}.gff -a ${genome_id}/${genome_id}.faa -d ${genome_id}/${genome_id}.ffn
+	# prodigal -i \$(basename \$genome_file .gz) -f gff -o prodigal/\$genome_id/\$genome_id.gff -a prodigal/\$genome_id/\$genome_id.faa -d prodigal/\$genome_id/\$genome_id.ffn
+
+	gff_params = ["-f", gff_file,] if gff_file is not None else []
 	prodigal_proc = subprocess.run(
 		[
 			"prodigal",
@@ -53,7 +56,7 @@ def call_prodigal(genome, protein_file, gene_file):
 			protein_file,
 			"-d",
 			gene_file,
-		],
+		] + [],
 		stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
 	)
 	
@@ -132,6 +135,7 @@ def main():
 	ap.add_argument("--dbcred", type=str)
 	ap.add_argument("--marker_set", type=str, choices=("full", "motus", "test"), default="motus")
 	ap.add_argument("--seq_cache", type=str)
+	ap.add_argument("--with_gff", action="store_true")
 	
 	args = ap.parse_args()
 
@@ -147,8 +151,9 @@ def main():
 		
 		proteins = os.path.join(args.output_dir, f"{args.genome_id}.faa")
 		genes = os.path.join(args.output_dir, f"{args.genome_id}.ffn")
+		gff = os.path.join(args.output_dir, f"{args.genome_id}.gff") if args.with_gff else None
 
-		call_prodigal(args.genome, proteins, genes)
+		call_prodigal(args.genome, proteins, genes, gff_file=gff)
 		logger.info("prodigal finished.")
 
 	elif genes_present and proteins_present:
