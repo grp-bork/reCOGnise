@@ -56,7 +56,7 @@ def call_prodigal(genome, protein_file, gene_file, gff_file=None):
 			protein_file,
 			"-d",
 			gene_file,
-		] + [],
+		] + gff_params,
 		stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
 	)
 	
