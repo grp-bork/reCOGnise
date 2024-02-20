@@ -136,11 +136,22 @@ def main():
 	ap.add_argument("--marker_set", type=str, choices=("full", "motus", "test"), default="motus")
 	ap.add_argument("--seq_cache", type=str)
 	ap.add_argument("--with_gff", action="store_true")
+	ap.add_argument("--min_markers", type=int, default=3)
+	ap.add_argument("--min_clusters", type=int, default=2)
+	ap.add_argument("--cluster_sizes", type=str)
 	
 	args = ap.parse_args()
 
 	genome_present, genes_present, proteins_present = (f is not None and os.path.isfile(f) for f in (args.genome, args.genes, args.proteins))
 	genes, proteins = None, None
+
+	accepted_clusters = None
+	if args.cluster_sizes is not None and os.path.isfile(args.cluster_sizes):
+		accepted_clusters = {
+			line.strip().split("\t")[0]
+			for line in open(args.cluster_sizes, "rt")
+			if int(line.strip().split("\t")[1]) >= args.min_clusters
+		}
 	
 	pathlib.Path(args.output_dir).mkdir(exist_ok=True, parents=True)
 	
@@ -163,18 +174,18 @@ def main():
 	elif proteins_present:
 		raise ValueError("Missing gene set, please specify with --genes.")
 
-	try:
-		# dbstr = json.load(open(args.dbcred, "rt")).get("DB_STR")
-		db_d = json.load(open(args.dbcred, "rt")).get("progenomes3_db")
-	except:
-		db_d = {}
+	# try:
+	# 	# dbstr = json.load(open(args.dbcred, "rt")).get("DB_STR")
+	# 	db_d = json.load(open(args.dbcred, "rt")).get("progenomes3_db")
+	# except:
+	# 	db_d = {}
 
-	user = db_d.get("username")
-	host = db_d.get("host")
-	pw = db_d.get("password")
-	port = db_d.get("port")
+	# user = db_d.get("username")
+	# host = db_d.get("host")
+	# pw = db_d.get("password")
+	# port = db_d.get("port")
 
-	dbstr = f"mongodb://{user}:{pw}@{host}:{port}" if (user and host and pw and port) else None
+	# dbstr = f"mongodb://{user}:{pw}@{host}:{port}" if (user and host and pw and port) else None
 
 	cog_dir = os.path.join(args.output_dir, "cogs")
 	
@@ -224,113 +235,76 @@ def main():
 		)
 		for line in it.chain(*output_lines):
 			print("\t".join(line), file=cogs_out)
-			specis[line[14]] += 1 
-		
-
-		# for cog in COGS:
-		# 	if args.marker_set == "motus" and not COGS[cog]:
-		# 		continue
-		# 	cog_file = os.path.join(cog_dir, f"{cog}.fna")
-		# 	if os.path.isfile(cog_file):
-		# 		with open(align_file, "wt") as aln_file, open(cog_file, "rt") as cog_in:
-		# 			for line in cog_in:
-		# 				if line[0] == ">":
-		# 					line = re.sub(r"$", f"  # {cog} {args.genome_id}", line.strip())
-		# 				print(line.strip(), file=aln_file)
-
-		# 		_, cog_lines = call_mapseq(
-		# 			align_file, args.cog_db, cog, speci_header=None,
-		# 		)
-
-		# 		if cog_lines is not None:
-		# 			for line in cog_lines:
-		# 				print("\t".join(line), file=cogs_out)
-		# 				specis[line[14]] += 1
-		# 			cogs_out.flush()
-
-
-				# mapseq_pr = subprocess.Popen(
-				# 	[
-				# 		"mapseq",
-				# 		align_file,
-				# 		os.path.join(args.cog_db, f"{cog}.fna"),
-				# 		os.path.join(args.cog_db, f"{cog}.specI.tax"),					
-				# 	],
-				# 	stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-				# )
-
-				# out, err = mapseq_pr.communicate()
-
-				# out = out.decode().strip().split("\n")
-				# if speci_header is None:				
-				# 	speci_header = [line.strip().split("\t") for line in out if line[0] == "#"]
-				# 	speci_header[-1].insert(0, "cog")
-
-				# speci_cog_d[cog] = [line.strip().split("\t") for line in out if line[0] != "#"]
-				# for line in speci_cog_d[cog]:
-				# 	line.insert(0, cog)
-				
-				# cat mapseq/\${bin_id}/speci/* | sed '3,\${ /^#/d }' > ${sample_id}/\${bin_id}.speci.assignments
-
-				# break
+			# if accepted_clusters is None or line[14] in accepted_clusters:
+			specis[line[14]] += 1
 
 	speci_out = open(os.path.join(args.output_dir, f"{args.genome_id}.specI.txt"), "wt")
 	speci_status_out = open(os.path.join(args.output_dir, f"{args.genome_id}.specI.status"), "wt")
-	seqfile = os.path.join(args.output_dir, f"{args.genome_id}.specI.ffn.gz")
-	open(seqfile, "wt").close()
+	# seqfile = os.path.join(args.output_dir, f"{args.genome_id}.specI.ffn.gz")
+	# open(seqfile, "wt").close()
 
 	with speci_out, speci_status_out:
-		# specis = Counter()
-		# if speci_header:
-		# 	print(*("\t".join(line) for line in speci_header), sep="\n", file=cogs_out)
-		# for cog in COGS:
-		# 	cog_lines = speci_cog_d.get(cog)
-		# 	if cog_lines is not None:
-		# 		for line in cog_lines:
-		# 			print("\t".join(line), file=cogs_out)
-		# 			specis[line[14]] += 1
-		
-		
 		speci_counts = specis.most_common()
 		print(speci_counts)
 		if not speci_counts:
 			print("Warning: could not find any markers. Aborting.")
 			print("NO_MARKERS", file=speci_status_out)
 		else:
-			first, second = (speci_counts[:2]) if len(speci_counts) > 2 else (speci_counts[0], None)
 
-			if (second is None) or (first[1] > second[1]):
+			(speci_0, counts_0), *remaining = speci_counts
+			speci_1, counts_1 = None, 0
+			if remaining:
+				(speci_1, counts_1), *remaining = remaining
+			
+			if counts_1 < counts_0 and 3 <= counts_0:
+				print(speci_0, file=speci_out)
 				n_seqs = -1
 
-				if args.seq_cache and os.path.isdir(args.seq_cache):
-					print("Looking up seq_cache...")
-					expected_files = [
-						os.path.join(args.seq_cache, f"{first[0]}.{suffix}")
-						for suffix in (".genes.ffn.gz", ".genes.nseqs")
-					]
-					if all(os.path.isfile(f) and os.stat(f).st_size for f in expected_files):
-						n_seqs = int(open(os.path.join(args.seq_cache, f"{first[0]}.genes.nseqs")).read().strip())
-						print("Copying sequences from seq_cache:", first[0], seqfile, "...", end="")
-						shutil.copyfile(os.path.join(args.seq_cache, f"{first[0]}.genes.ffn.gz"), seqfile)
-						print(n_seqs)
-
-				if n_seqs == -1 and dbstr is not None:
-					print("Getting sequences from cluster:", first[0], seqfile, "...", end="")
-					n_seqs = get_sequences_from_cluster(dbstr, first[0], seqfile)
-					print(n_seqs)
-
-				print(first[0], file=speci_out)
-
-				if not n_seqs:
+				# if not n_seqs:
+				if accepted_clusters and speci_0 not in accepted_clusters:
 					print("Warning: specI cluster is too small. Aborting.")
 					print("SPECI_SIZE_INSUFFICIENT", file=speci_status_out)
 				else:
 					print("OK", file=speci_status_out)
 					open(speci_status_out.name + ".OK", "wt").close()
-
 			else:
-				print(f"Warning: cannot determine consensus specI. first={first} second={second}. Aborting.")
+				print(f"Warning: cannot determine consensus specI. first={speci_0} ({counts_0}) second={speci_1} ({counts_1}). Aborting.")
 				print("NO_CONSENSUS", file=speci_status_out)
+
+			# first, second = (speci_counts[:2]) if len(speci_counts) > 2 else (speci_counts[0], None)
+
+			# if (second is None) or (first[1] > second[1]):
+			# 	n_seqs = -1
+
+			# 	if args.seq_cache and os.path.isdir(args.seq_cache):
+			# 		print("Looking up seq_cache...")
+			# 		expected_files = [
+			# 			os.path.join(args.seq_cache, f"{first[0]}.{suffix}")
+			# 			for suffix in (".genes.ffn.gz", ".genes.nseqs")
+			# 		]
+			# 		if all(os.path.isfile(f) and os.stat(f).st_size for f in expected_files):
+			# 			n_seqs = int(open(os.path.join(args.seq_cache, f"{first[0]}.genes.nseqs")).read().strip())
+			# 			print("Copying sequences from seq_cache:", first[0], seqfile, "...", end="")
+			# 			shutil.copyfile(os.path.join(args.seq_cache, f"{first[0]}.genes.ffn.gz"), seqfile)
+			# 			print(n_seqs)
+
+			# 	if n_seqs == -1 and dbstr is not None:
+			# 		print("Getting sequences from cluster:", first[0], seqfile, "...", end="")
+			# 		n_seqs = get_sequences_from_cluster(dbstr, first[0], seqfile)
+			# 		print(n_seqs)
+
+			# 	print(first[0], file=speci_out)
+
+			# 	if not n_seqs:
+			# 		print("Warning: specI cluster is too small. Aborting.")
+			# 		print("SPECI_SIZE_INSUFFICIENT", file=speci_status_out)
+			# 	else:
+			# 		print("OK", file=speci_status_out)
+			# 		open(speci_status_out.name + ".OK", "wt").close()
+
+			# else:
+			# 	print(f"Warning: cannot determine consensus specI. first={first} second={second}. Aborting.")
+			# 	print("NO_CONSENSUS", file=speci_status_out)
 
 
 
