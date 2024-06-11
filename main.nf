@@ -2,10 +2,10 @@
 
 nextflow.enable.dsl=2
 
-include { species_recognition } from "./modules/recognise"
+include { recognise_genome } from "./modules/recognise"
 
 
-params.file_pattern = "**.fna"
+params.file_pattern = "**.{fna,fasta,fa,fna.gz,fasta.gz,fa.gz}"
 print "PARAMS:\n" + params
 
 def suffix_pattern = params.file_pattern.replaceAll(/\*/, "")
@@ -21,6 +21,6 @@ workflow {
         }
 
     
-    species_recognition(genomes_ch)
+    recognise_genome(genomes_ch)
 }
 
