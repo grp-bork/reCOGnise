@@ -21,6 +21,6 @@ workflow {
         }
 
     
-    recognise_genome(genomes_ch)
+    recognise_genome(genomes_ch, params.marker_db)
 }
 

@@ -20,9 +20,14 @@
           "type": "string",
           "format": "directory-path",
           "description": "Directory path to output files"
+        },
+        "marker_db": {
+          "type": "string",
+          "format": "directory-path",
+          "description": "Directory path to COG markers"
         }
       },
-      "required": ["output_dir", "input_dir"]
+      "required": ["output_dir", "input_dir", "marker_db"]
     }    
   },
   "allOf": [
