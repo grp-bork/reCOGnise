@@ -8,7 +8,7 @@ process recognise_genome {
 	label "recognise"
 
 	input:
-	tuple val(speci), val(genome_id), path(genome)
+	tuple val(genome_id), path(genome)
 	path(marker_genes_db)
 	
 	

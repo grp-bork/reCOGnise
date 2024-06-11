@@ -18,7 +18,7 @@ workflow {
         .map { fasta ->
             def genome_id = fasta.name.replaceAll(/\.(fa|fasta|fna)(\.gz)?/, "")
             // def genome_id = fasta.name.split()
-            return tuple(speci_tag, genome_id, fasta)
+            return tuple(genome_id, fasta)
         }
 
     
