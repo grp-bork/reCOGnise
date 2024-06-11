@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 
 LABEL maintainer="cschu1981@gmail.com"
-LABEL version="0.4.7"
+LABEL version="0.7"
 LABEL description="This is a Docker Image for the reCOGnise tool."
 
 
