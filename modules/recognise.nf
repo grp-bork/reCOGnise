@@ -3,7 +3,7 @@ params.recognise.marker_set = "motus"
 
 
 process recognise_genome {
-	container "ghcr.io/cschu/recognise:main"
+	container "ghcr.io/grp-bork/recognise:main"
 	label "recognise"
 
 	input:

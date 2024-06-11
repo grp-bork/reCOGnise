@@ -32,7 +32,7 @@ RUN cd /opt/software && \
 
 ARG RECOGNISE_GUARD=1
 RUN cd /opt/software && \
-	git clone https://github.com/cschu/reCOGnise.git && \
+	git clone https://github.com/grp-bork/reCOGnise.git && \
 	cd reCOGnise && \
 	pip install .
 

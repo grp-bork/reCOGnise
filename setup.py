@@ -25,7 +25,6 @@ with open(path.join(here, "DESCRIPTION.md"), encoding="utf-8") as description:
 		version=version,
 		description=description,
 		long_description=long_description,
-		# url="https://github.com/cschu/gff_quantifier",
 		author="Christian Schudoma",
 		author_email="christian.schudoma@embl.de",
 		license="MIT",
