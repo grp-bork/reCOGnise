@@ -29,7 +29,7 @@
         }
       },
       "required": ["output_dir", "input_dir", "marker_db"]
-    }    
+    }
   },
   "allOf": [
     {
