@@ -3,6 +3,7 @@ params.recognise.marker_set = "motus"
 
 
 process recognise_genome {
+    publishDir params.output_dir, mode: "copy"
 	container "ghcr.io/grp-bork/recognise:main"
 	label "recognise"
 
