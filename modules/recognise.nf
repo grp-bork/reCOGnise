@@ -29,7 +29,7 @@ process recognise_genome {
         cp -v ${genome} genome_file
     fi
 
-	recognise --marker_set ${params.recognise.marker_set} --genome genome_file --cpus ${task.cpus} --with_gff -o recognise/${genome_id} ${genome_id} \$(readlink ${marker_genes_db})
+	recognise --marker_set ${params.recognise.marker_set} --genome genome_file --cpus ${task.cpus} --with_gff -o recognise/${genome_id} ${genome_id} \$(readlink ${marker_genes_db})/recognise_marker_genes
 	gzip -v recognise/${genome_id}/*.{faa,ffn,gff}
 
 	rm -fv genome_file
