@@ -6,6 +6,7 @@ process recognise_genome {
     publishDir params.output_dir, mode: "copy"
 	container "ghcr.io/grp-bork/recognise:main"
 	label "recognise"
+	label "small"
 
 	input:
 	tuple val(genome_id), path(genome)
