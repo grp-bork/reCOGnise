@@ -24,7 +24,7 @@ RUN mkdir -p /opt/software && \
 	ln -s /opt/software/mapseq/share /usr/bin/
 
 RUN cd /opt/software && \
-	git clone https://github.com/motu-tool/fetchMGs.git && \
+	git clone https://github.com/motu-tool/fetchMGs.pl.git fetchMGs && \
 	ln -s /opt/software/fetchMGs/fetchMGs.pl /usr/bin/fetchMGs.pl && \
 	ln -s /opt/software/fetchMGs/bin/hmmsearch /usr/bin/hmmsearch && \
 	ln -s /opt/software/fetchMGs/bin/seqtk /usr/bin/seqtk && \
