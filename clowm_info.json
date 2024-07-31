@@ -1,0 +1,19 @@
+{
+  "inputParameters": [
+    "input_dir"
+  ],
+  "outputParameters": [
+    "output_dir"
+  ],
+  "exampleParameters": {
+    "input_dir": "s3://example-data-recognise"
+  },
+  "dois": [
+    "10.5281/zenodo.13143009",
+    "10.1038/s41586-021-04233-4",
+    "10.1093/nar/gkac1078"
+  ],
+  "resourceParameters": [
+    "marker_db"
+  ]
+}
