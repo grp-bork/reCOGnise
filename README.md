@@ -48,8 +48,6 @@
 
 
 ---
-#### Description
-
 #### Citation
 This workflow: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13143009.svg)](https://doi.org/10.5281/zenodo.13143009)
 
@@ -66,9 +64,32 @@ Coelho LP, Alves R, Del Río ÁR, et al. Towards the biogeography of prokaryotic
 ---
 # Requirements
 
+`reCOGnise` requires a docker/singularity installation. All dependencies are contained in the `reCOGnise` docker container.
+
+Dependencies are
+
+* `prodigal`
+* `fetchMGS.pl`
+* `MAPseq`
+
 ---
 # Usage
 ## Cloud-based Workflow Manager (CloWM)
 This workflow will be available on the CloWM platform (coming soon).
 
 ## Command-Line Interface (CLI)
+
+You can either clone this repository from GitHub and run it as follows
+```
+git clone https://github.com/grp-bork/reCOGnise.git
+nextflow run /path/to/reCOGnise --input_dir /path/to/genome/fastas --output_dir /path/to/output_dir
+```
+
+Input genome fasta files have to have one of the following file endings: `{fna,fasta,fa,fna.gz,fasta.gz,fa.gz}`. Alternatively, you can set the pattern with
+`params.file_pattern = "**.{<comma-separated-list-of-file-endings>}"`.
+
+
+Or, you can have nextflow pull it from github and run it from the `$HOME/.nextflow` directory.
+```
+nextflow run grp-bork/reCOGnise --input_dir /path/to/genome_files --output_dir path/to/output_dir
+```
