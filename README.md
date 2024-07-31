@@ -9,7 +9,7 @@
       Raise an <a href="https://github.com/grp-bork/reCOGnise/issues">issue</a> or <a href="mailto:N4M@embl.de">contact us</a><br><br>
       See our <a href="https://www.bork.embl.de/services.html">other Software & Services</a>
     </td>
-    <td width="500px">
+    <td width="250px">
       Contributors:<br>
       <ul>
         <li>
@@ -20,6 +20,21 @@
         </li>
       </ul>
     </td>
+    <td width="250px">
+      Collaborators:<br>
+      <ul>
+        <li>
+          <a href="https://github.com/fullama/">Anthony Fullam</a> <a href="https://orcid.org/0000-0002-0884-8124"><img src="https://orcid.org/assets/vectors/orcid.logo.icon.svg" alt="ORCID icon" width="20px" height="20px"></a><br>
+        </li>
+        <li>
+          <a href="">Askarbek Orakov</a> <a href="https://orcid.org/0000-0001-6823-5269"><img src="https://orcid.org/assets/vectors/orcid.logo.icon.svg" alt="ORCID icon" width="20px" height="20px"></a><br>
+        </li>
+        <li>
+          <a href="https://github.com/defleury">Sebastian Schmidt</a> <a href="https://orcid.org/0000-0001-8587-4177"><img src="https://orcid.org/assets/vectors/orcid.logo.icon.svg" alt="ORCID icon" width="20px" height="20px"></a><br>
+        </li>
+      </ul>
+    </td>
+
   </tr>
   <tr>
     <td colspan="3" align="center">The development of this workflow was supported by <a href="https://www.nfdi4microbiota.de/">NFDI4Microbiota <img src="https://github.com/user-attachments/assets/1e78f65e-9828-46c0-834c-0ed12ca9d5ed" alt="NFDI4Microbiota icon" width="20px" height="20px"></a> 
