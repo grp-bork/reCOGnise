@@ -27,7 +27,7 @@
           <a href="https://github.com/fullama/">Anthony Fullam</a> <a href="https://orcid.org/0000-0002-0884-8124"><img src="https://orcid.org/assets/vectors/orcid.logo.icon.svg" alt="ORCID icon" width="20px" height="20px"></a><br>
         </li>
         <li>
-          <a href="">Askarbek Orakov</a> <a href="https://orcid.org/0000-0001-6823-5269"><img src="https://orcid.org/assets/vectors/orcid.logo.icon.svg" alt="ORCID icon" width="20px" height="20px"></a><br>
+          <a href="https://github.com/Askarbek-orakov/">Askarbek Orakov</a> <a href="https://orcid.org/0000-0001-6823-5269"><img src="https://orcid.org/assets/vectors/orcid.logo.icon.svg" alt="ORCID icon" width="20px" height="20px"></a><br>
         </li>
         <li>
           <a href="https://github.com/defleury">Sebastian Schmidt</a> <a href="https://orcid.org/0000-0001-8587-4177"><img src="https://orcid.org/assets/vectors/orcid.logo.icon.svg" alt="ORCID icon" width="20px" height="20px"></a><br>
