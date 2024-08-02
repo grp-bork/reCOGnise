@@ -49,7 +49,7 @@
 
 ---
 #### Citation
-This workflow: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13143009.svg)](https://doi.org/10.5281/zenodo.13143009)
+This workflow: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13143008.svg)](https://doi.org/10.5281/zenodo.13143008)
 
 Also cite:
 ```
