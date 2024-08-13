@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/grp-bork/reCOGnise,23,3
+/grp-bork/reCOGnise/blob/main/nextflow.config,17,3
+/grp-bork/reCOGnise/blob/main/README.md,11,1
+/grp-bork/reCOGnise/blob/main/main.nf,10,2
+/grp-bork/reCOGnise/blob/main/nextflow_schema.json,10,2
+/grp-bork/reCOGnise/edit/main/README.md,9,1
+/grp-bork/reCOGnise/tree/main,9,1
+/grp-bork/reCOGnise/tree/main/modules,8,2
+/grp-bork/reCOGnise/tree/main/docs,7,1
+/grp-bork/reCOGnise/blob/main/modules/recognise.nf,6,2
