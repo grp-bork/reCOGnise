@@ -6,7 +6,7 @@
   "type": "object",
   "definitions": {
     "required": {
-      "title": "Required",
+      "title": "Input/Output Parameters",
       "type": "object",
       "description": "",
       "default": "",
