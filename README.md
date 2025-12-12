@@ -73,6 +73,11 @@ Dependencies are
 * `MAPseq`
 
 ---
+# Database
+
+The reCOGnise marker database can be downloaded from [Zenodo](https://zenodo.org/records/17916463/files/recognise_markers.tar.gz).
+
+---
 # Usage
 ## Cloud-based Workflow Manager (CloWM)
 This workflow will be available on the CloWM platform (coming soon).
@@ -93,3 +98,4 @@ Or, you can have nextflow pull it from github and run it from the `$HOME/.nextfl
 ```
 nextflow run grp-bork/reCOGnise --input_dir /path/to/genome_files --output_dir path/to/output_dir
 ```
+
