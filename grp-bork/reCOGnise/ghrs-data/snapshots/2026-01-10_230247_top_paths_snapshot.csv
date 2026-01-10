@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/grp-bork/reCOGnise,3,3
+/grp-bork/reCOGnise/tree/main/modules,3,1
+/grp-bork/reCOGnise/blob/main/environment.yml,2,1
+/grp-bork/reCOGnise/blob/main/nextflow.config,2,1
+/grp-bork/reCOGnise/blob/main/modules/recognise.nf,1,1
+/grp-bork/reCOGnise/blob/main/recognise/db/__init__.py,1,1
+/grp-bork/reCOGnise/blob/main/recognise/db/queries.py,1,1
+/grp-bork/reCOGnise/blob/main/recognise/tasks/__init__.py,1,1
+/grp-bork/reCOGnise/blob/main/recognise/tasks/mapseq.py,1,1
+/grp-bork/reCOGnise/blob/main/setup.py,1,1
