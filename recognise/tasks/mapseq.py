@@ -11,15 +11,17 @@ def call_mapseq(align_file, cog_db, cog, threads=4, speci_header=None):
 
     msg, speci_header, speci_cog = None, None, None
 
+    cmd = [
+        "mapseq",
+        "-nthreads", f"{threads}",
+        str(align_file),
+        str(cog_db / f"{cog}.fna"),
+        str(cog_db / f"{cog}.specI.tax"),
+    ]
+
     try:
         mapseq_pr = subprocess.run(
-            [
-                "mapseq",
-                "-nthreads", f"{threads}",
-                str(align_file),
-                str(cog_db / f"{cog}.fna"),
-                str(cog_db / f"{cog}.specI.tax"),
-            ],
+            cmd,
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             check=True,
         )
