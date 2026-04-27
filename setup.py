@@ -39,7 +39,8 @@ with open(path.join(here, "DESCRIPTION.md"), encoding="utf-8") as description:
 		keywords="taxonomy assignment",
 		packages=find_packages(exclude=["test"]),
 		install_requires=[
-			"pymongo",
+			"pyhmmer ~=0.12.0",
+			"pyrodigal ~=3.0",
 		],
 		entry_points={
 			"console_scripts": [

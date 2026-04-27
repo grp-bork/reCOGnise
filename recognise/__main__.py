@@ -12,6 +12,7 @@ from contextlib import nullcontext
 from .tasks.fetchmgs import call_fetch_mgs as fetchmgs
 from .tasks.mapseq import task as mapseq
 from .tasks.prodigal import call_prodigal as prodigal
+from .tasks.pyrodigal import run_pyrodigal as pyrodigal
 
 
 logging.basicConfig(
@@ -87,7 +88,8 @@ def main():
         genes = output_dir / f"{args.genome_id}.ffn"
         gff = output_dir / f"{args.genome_id}.gff"
 
-        prodigal(args.genome, proteins, genes, gff)
+        # prodigal(args.genome, proteins, genes, gff)
+        pyrodigal(args.genome, args.genome_id, output_dir)
         logger.info("prodigal finished.")
 
     elif genes_present and proteins_present:
