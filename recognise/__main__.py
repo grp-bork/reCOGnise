@@ -52,7 +52,7 @@ def main():
     ap.add_argument("--genome", type=str)
     ap.add_argument("--cpus", type=int, default=4)
     ap.add_argument("--output_dir", "-o", type=str, default="recognise_out")
-    ap.add_argument("--marker_set", type=str, choices=("full", "motus", "test"), default="motus")
+    ap.add_argument("--marker_set", type=str, choices=("motus", "test",), default="motus")
     ap.add_argument("--with_gff", action="store_true")  # deprecated
     ap.add_argument("--min_markers", type=int, default=3)
     ap.add_argument("--min_clusters", type=int, default=2)
@@ -110,7 +110,8 @@ def main():
 
     tasks = []
     for cog, is_motus_cog in COGS.items():
-        if args.marker_set == "motus" and not is_motus_cog:
+        # if args.marker_set == "motus" and not is_motus_cog:
+        if not is_motus_cog:
             continue
         if args.marker_set == "test" and len(tasks) == 3:
             break
@@ -131,7 +132,7 @@ def main():
 
     logger.info("MAPseq finished.")
 
-    print(results)
+    # print(results)
 
     try:
         messages, output_lines = zip(*results)
@@ -149,6 +150,7 @@ def main():
         )
         for line in it.chain(*output_lines):
             print("\t".join(line), file=cogs_out)
+            print("\t".join(line),)
             specis[line[14]] += 1
 
     if args.with_sentinels:
