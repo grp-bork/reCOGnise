@@ -63,7 +63,7 @@ def run_fetchmgs(protein_file, gene_file, outdir, cpus, cleanup=True, very_best_
             seqid, cog = seqid[:p], seqid[p + 1:]
             cfile = cog_files.get(cog)
             if cfile is None:
-                cog_files[cog] = open(outdir / f"{cog}.fna", "wt", encoding="utf-8")
+                cfile = cog_files[cog] = open(outdir / f"{cog}.fna", "wt", encoding="utf-8")
             print(f">{seqid}\n{seq}\n", end="", file=cfile)
         
         for f in cog_files.values():
