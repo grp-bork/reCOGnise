@@ -181,7 +181,7 @@ def main():
                     logger.warning("specI cluster is too small. Aborting.")
                 else:
 
-                    logger.info("Found specI: %s (%s / %s markers)" % (speci_0, counts_1, len(tasks),))
+                    logger.info("Found specI: %s (%s / %s markers)" % (speci_0, counts_0, len(tasks),))
                     if args.with_sentinels:
                         print(speci_0, file=speci_out)
                         print("OK", file=speci_status_out)
