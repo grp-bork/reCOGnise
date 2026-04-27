@@ -49,7 +49,7 @@ def main():
     ap.add_argument("--cpus", type=int, default=4)
     ap.add_argument("--output_dir", "-o", type=str, default="recognise_out")
     ap.add_argument("--marker_set", type=str, choices=("full", "motus", "test"), default="motus")
-    ap.add_argument("--with_gff", action="store_true")
+    ap.add_argument("--with_gff", action="store_true")  # deprecated
     ap.add_argument("--min_markers", type=int, default=3)
     ap.add_argument("--min_clusters", type=int, default=2)
     ap.add_argument("--cluster_sizes", type=str)
@@ -57,29 +57,30 @@ def main():
     args = ap.parse_args()
 
     genome_present, genes_present, proteins_present = (
-        f is not None and os.path.isfile(f)
+        f is not None and pathlib.Path(f).is_file()
         for f in (args.genome, args.genes, args.proteins)
     )
     genes, proteins = None, None
 
     accepted_clusters = None
-    if args.cluster_sizes is not None and os.path.isfile(args.cluster_sizes):
+    if args.cluster_sizes is not None and pathlib.Path(args.cluster_sizes).is_file():
         accepted_clusters = {
             line.strip().split("\t")[0]
             for line in open(args.cluster_sizes, "rt", encoding='utf-8')
             if int(line.strip().split("\t")[1]) >= args.min_clusters
         }
     
-    pathlib.Path(args.output_dir).mkdir(exist_ok=True, parents=True)
+    output_dir = pathlib.Path(args.output_dir)
+    output_dir.mkdir(exist_ok=True, parents=True)
     
     if genome_present:
         logger.info("Running prodigal...")
         if genes_present or proteins_present:
             raise ValueError("Please specify either a genome or a gene/protein set combination.")
         
-        proteins = os.path.join(args.output_dir, f"{args.genome_id}.faa")
-        genes = os.path.join(args.output_dir, f"{args.genome_id}.ffn")
-        gff = os.path.join(args.output_dir, f"{args.genome_id}.gff") 
+        proteins = output_dir / f"{args.genome_id}.faa"
+        genes = output_dir / f"{args.genome_id}.ffn"
+        gff = output_dir / f"{args.genome_id}.gff"
 
         prodigal(args.genome, proteins, genes, gff)
         logger.info("prodigal finished.")
@@ -91,7 +92,7 @@ def main():
     elif proteins_present:
         raise ValueError("Missing gene set, please specify with --genes.")
 
-    cog_dir = os.path.join(args.output_dir, "cogs")
+    cog_dir = output_dir / "cogs"
     
     logger.info("Running fetchMGs...")
     fetchmgs(proteins, genes, cog_dir, args.cpus)
@@ -105,9 +106,9 @@ def main():
             continue
         if args.marker_set == "test" and len(tasks) == 3:
             break
-        cog_file = os.path.join(cog_dir, f"{cog}.fna")
-        if os.path.isfile(cog_file) and os.stat(cog_file).st_size:
-            tasks.append((cog_file, cog, args.genome_id, args.cog_db, min(args.cpus, 4)))
+        cog_file = cog_dir / f"{cog}.fna"
+        if cog_file.is_file() and os.stat(cog_file).st_size:
+            tasks.append((cog_file, cog, args.genome_id, pathlib.Path(args.cog_db), min(args.cpus, 4)))
 
     logger.info(
         f"Running {args.cpus // min(args.cpus, 4)} MAPseq processes on {len(tasks)} marker genes. "
@@ -133,7 +134,7 @@ def main():
         if msg is not None:
             raise ValueError(f"{msg}")
 
-    with open(os.path.join(args.output_dir, f"{args.genome_id}.cogs.txt"), "wt") as cogs_out:
+    with open(output_dir / f"{args.genome_id}.cogs.txt", "wt") as cogs_out:
         print(
             *("cog", "query", "dbhit",	"bitscore", "identity",	"matches", "mismatches", "gaps", "query_start", "query_end", "dbhit_start",	"dbhit_end", "strand",	"specI_only:specI_cluster",	"combined_cf", "score_cf",),
             sep="\t", file=cogs_out, flush=True
@@ -142,8 +143,8 @@ def main():
             print("\t".join(line), file=cogs_out)
             specis[line[14]] += 1
 
-    speci_out = open(os.path.join(args.output_dir, f"{args.genome_id}.specI.txt"), "wt", encoding='utf-8',)
-    speci_status_out = open(os.path.join(args.output_dir, f"{args.genome_id}.specI.status"), "wt", encoding='utf-8',)
+    speci_out = open(args.output_dir / f"{args.genome_id}.specI.txt", "wt", encoding='utf-8',)
+    speci_status_out = open(args.output_dir / f"{args.genome_id}.specI.status", "wt", encoding='utf-8',)
 
     with speci_out, speci_status_out:
         speci_counts = specis.most_common()

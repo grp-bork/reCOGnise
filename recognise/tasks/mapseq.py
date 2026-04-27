@@ -1,6 +1,5 @@
 """ Module to call MAPseq """
 
-import os
 import re
 import subprocess
 
@@ -16,8 +15,8 @@ def call_mapseq(align_file, cog_db, cog, threads=4, speci_header=None):
                 "mapseq",
                 "-nthreads", f"{threads}",
                 align_file,
-                os.path.join(cog_db, f"{cog}.fna"),
-                os.path.join(cog_db, f"{cog}.specI.tax"),
+                str(cog_db / f"{cog}.fna"),
+                str(cog_db / f"{cog}.specI.tax"),
             ],
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             check=True,
