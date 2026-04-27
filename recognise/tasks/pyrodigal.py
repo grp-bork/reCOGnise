@@ -1,16 +1,6 @@
-import itertools as it
-
 import pyrodigal
 
-
-def read_fasta(f):
-    with open(f) as _in:
-        gen = it.groupby(_in, key=lambda x:x[0]==">",)
-        for is_header, item in gen:
-            if is_header:
-                seqid = next(item).rstrip()[1:]
-                _, seqs = next(gen)
-                yield seqid, "".join(s.rstrip() for s in seqs)
+from ..utils import read_fasta
 
 
 def run_pyrodigal(f, genome_id, output_dir):
@@ -20,7 +10,6 @@ def run_pyrodigal(f, genome_id, output_dir):
     ids, seqs = zip(*read_fasta(f))
     _ = gf.train(*seqs)
 
-    # outpath = pathlib.Path(output_dir)
     output_dir.mkdir(exist_ok=True, parents=True,)
 
     faa_out = open(output_dir / f"{genome_id}.faa", "wt", encoding="UTF-8",)
