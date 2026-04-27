@@ -168,16 +168,18 @@ def main():
                 (speci_1, counts_1), *remaining = remaining
             
             if counts_1 < counts_0 and 3 <= counts_0:
-                print(speci_0, file=speci_out)
-                
                 if accepted_clusters and speci_0 not in accepted_clusters:
                     if args.create_workflow_sentinels:
                         print("SPECI_SIZE_INSUFFICIENT", file=speci_status_out)
                     logger.warning("specI cluster is too small. Aborting.")
                 else:
+
+                    logger.info("Found specI: %s" % speci_0)
                     if args.create_workflow_sentinels:
+                        print(speci_0, file=speci_out)
                         print("OK", file=speci_status_out)
                     pathlib.Path(speci_status_out.name + ".OK").touch()
+
             else:
                 if args.create_workflow_sentinels:
                     print("NO_CONSENSUS", file=speci_status_out)
