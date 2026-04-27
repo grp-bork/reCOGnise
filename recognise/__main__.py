@@ -7,9 +7,9 @@ import pathlib
 
 from collections import Counter
 
-from .tasks.fetchmgs import call_fetch_mgs
+from .tasks.fetchmgs import call_fetch_mgs as fetchmgs
 from .tasks.mapseq import task as mapseq
-from .tasks.prodigal import call_prodigal
+from .tasks.prodigal import call_prodigal as prodigal
 
 
 logging.basicConfig(
@@ -79,9 +79,9 @@ def main():
         
         proteins = os.path.join(args.output_dir, f"{args.genome_id}.faa")
         genes = os.path.join(args.output_dir, f"{args.genome_id}.ffn")
-        gff = os.path.join(args.output_dir, f"{args.genome_id}.gff") if args.with_gff else None
+        gff = os.path.join(args.output_dir, f"{args.genome_id}.gff") 
 
-        call_prodigal(args.genome, proteins, genes, gff_file=gff)
+        prodigal(args.genome, proteins, genes, gff)
         logger.info("prodigal finished.")
 
     elif genes_present and proteins_present:
@@ -94,7 +94,7 @@ def main():
     cog_dir = os.path.join(args.output_dir, "cogs")
     
     logger.info("Running fetchMGs...")
-    call_fetch_mgs(proteins, genes, cog_dir, args.cpus)
+    fetchmgs(proteins, genes, cog_dir, args.cpus)
     logger.info("fetchMGs finished.")
 
     specis = Counter()

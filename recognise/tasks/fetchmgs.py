@@ -8,7 +8,7 @@ def call_fetch_mgs(protein_file, gene_file, cog_dir, cpus):
         "-o", cog_dir,
         "-t", f"{cpus}",
         "-m", "extraction",
-        "-x", "/usr/bin",
+        # "-x", "/usr/bin",
         "-d", f"{gene_file}",
         f"{protein_file}",
     ]		
