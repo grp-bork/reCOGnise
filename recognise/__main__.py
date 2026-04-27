@@ -147,8 +147,8 @@ def main():
             specis[line[14]] += 1
 
     if args.create_workflow_sentinels:
-        speci_out = open(args.output_dir / f"{args.genome_id}.specI.txt", "wt", encoding='utf-8',)
-        speci_status_out = open(args.output_dir / f"{args.genome_id}.specI.status", "wt", encoding='utf-8',)
+        speci_out = open(output_dir / f"{args.genome_id}.specI.txt", "wt", encoding='utf-8',)
+        speci_status_out = open(output_dir / f"{args.genome_id}.specI.status", "wt", encoding='utf-8',)
     else:
         speci_out, speci_status_out = nullcontext(), nullcontext()
 
