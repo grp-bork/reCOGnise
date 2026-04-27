@@ -4,7 +4,7 @@ import logging
 import multiprocessing as mp
 import os
 import pathlib
-import sys
+import shutil
 
 from collections import Counter
 from contextlib import nullcontext
@@ -181,6 +181,9 @@ def main():
                         print(speci_0, file=speci_out)
                         print("OK", file=speci_status_out)
                         pathlib.Path(speci_status_out.name + ".OK").touch()
+
+                    if not args.keep_intermediates:
+                        shutil.rmtree(cog_dir)
 
             else:
                 if args.with_sentinels:
