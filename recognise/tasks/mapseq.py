@@ -31,6 +31,8 @@ def call_mapseq(align_file, cog_db, cog, threads=4, speci_header=None):
 
         speci_cog = [[cog] + (line.strip().split("\t")) for line in out if line[0] != "#"]
 
+    
+    
     with open(f"{align_file}.done", "wt", encoding="utf-8") as _out:
         ...
 
@@ -51,5 +53,5 @@ def task(argv):
                 line = re.sub(r"$", f"  # {cog} {genome_id}", line.strip())
             print(line.strip(), file=aln_file)
 
-    msg, _, cog_lines = call_mapseq(aln_file, cog_db, cog, threads=threads)
+    msg, _, cog_lines = call_mapseq(f"{cog_file}.align", cog_db, cog, threads=threads)
     return msg, cog_lines
