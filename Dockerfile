@@ -24,11 +24,9 @@ RUN mkdir -p /opt/software && \
 	ln -s /opt/software/mapseq/share /usr/bin/
 
 RUN cd /opt/software && \
-	git clone https://github.com/motu-tool/fetchMGs.pl.git fetchMGs && \
-	ln -s /opt/software/fetchMGs/fetchMGs.pl /usr/bin/fetchMGs.pl && \
-	ln -s /opt/software/fetchMGs/bin/hmmsearch /usr/bin/hmmsearch && \
-	ln -s /opt/software/fetchMGs/bin/seqtk /usr/bin/seqtk && \
-	ln -s /opt/software/fetchMGs/lib /usr/bin/lib	
+	git clone https://github.com/cschu/fetchMGs.git fetchMGs && \
+	cd fetchMGs && \
+	pip install --no-deps .
 
 ARG RECOGNISE_GUARD=1
 RUN cd /opt/software && \
