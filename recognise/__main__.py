@@ -143,14 +143,17 @@ def main():
         if msg is not None:
             raise ValueError(f"{msg}")
 
+    header = "\t".join(("cog", "query", "dbhit",	"bitscore", "identity",	"matches", "mismatches", "gaps", "query_start", "query_end", "dbhit_start",	"dbhit_end", "strand",	"specI_only:specI_cluster",	"combined_cf", "score_cf",))
     with open(output_dir / f"{args.genome_id}.cogs.txt", "wt") as cogs_out:
         print(
-            *("cog", "query", "dbhit",	"bitscore", "identity",	"matches", "mismatches", "gaps", "query_start", "query_end", "dbhit_start",	"dbhit_end", "strand",	"specI_only:specI_cluster",	"combined_cf", "score_cf",),
-            sep="\t", file=cogs_out, flush=True
+            header, file=cogs_out, flush=True
         )
+
+        logger.info(header)
+
         for line in it.chain(*output_lines):
             print("\t".join(line), file=cogs_out)
-            print("\t".join(line),)
+            logger.info("\t".join(line))
             specis[line[14]] += 1
 
     if args.with_sentinels:
@@ -161,7 +164,7 @@ def main():
 
     with speci_out, speci_status_out:
         speci_counts = specis.most_common()
-        print(speci_counts)
+        # print(speci_counts)
         if not speci_counts:
             if args.with_sentinels:
                 print("NO_MARKERS", file=speci_status_out)
