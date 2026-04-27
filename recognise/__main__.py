@@ -162,7 +162,7 @@ def main():
         
         proteins = os.path.join(args.output_dir, f"{args.genome_id}.faa")
         genes = os.path.join(args.output_dir, f"{args.genome_id}.ffn")
-        gff = os.path.join(args.output_dir, f"{args.genome_id}.gff") if args.with_gff else None
+        gff = os.path.join(args.output_dir, f"{args.genome_id}.gff")
 
         call_prodigal(args.genome, proteins, genes, gff_file=gff)
         logger.info("prodigal finished.")
