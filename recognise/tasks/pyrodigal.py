@@ -9,8 +9,9 @@ def read_fasta(f):
         gen = it.groupby(_in.readlines(), )
         for is_header, item in gen:
             if is_header:
+                seqid = next(item).rstrip()[1:]
                 _, seqs = next(gen)
-                yield next(item).rstrip()[1:], "".join(s.rstrip() for s in seqs)
+                yield seqid, "".join(s.rstrip() for s in seqs)
 
 
 def run_pyrodigal(f, genome_id, output_dir):
