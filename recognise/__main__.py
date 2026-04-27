@@ -9,9 +9,10 @@ import shutil
 from collections import Counter
 from contextlib import nullcontext
 
-from .tasks.fetchmgs import call_fetch_mgs as fetchmgs
+# from .tasks.fetchmgs import call_fetch_mgs as fetchmgs
+from .tasks.fetchmgs import run_fetchmgs as fetchmgs
 from .tasks.mapseq import task as mapseq
-from .tasks.prodigal import call_prodigal as prodigal
+# from .tasks.prodigal import call_prodigal as prodigal
 from .tasks.pyrodigal import run_pyrodigal as pyrodigal
 
 
