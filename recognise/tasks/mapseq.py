@@ -42,7 +42,7 @@ def task(argv):
     """ Preprocesses input fasta and calls MAPseq """
     cog_file, cog, genome_id, cog_db, threads = argv
 
-    aln_file = open(cog_file + ".align", "wt", encoding="UTF-8",)
+    aln_file = open(cog_file.name + ".align", "wt", encoding="UTF-8",)
     cog_in = open(cog_file, "rt", encoding="UTF-8",)
 
     with aln_file, cog_in:
@@ -51,5 +51,5 @@ def task(argv):
                 line = re.sub(r"$", f"  # {cog} {genome_id}", line.strip())
             print(line.strip(), file=aln_file)
 
-    msg, _, cog_lines = call_mapseq(cog_file + ".align", cog_db, cog, threads=threads)
+    msg, _, cog_lines = call_mapseq(cog_file.name + ".align", cog_db, cog, threads=threads)
     return msg, cog_lines
