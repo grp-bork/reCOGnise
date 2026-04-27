@@ -4,8 +4,10 @@ import logging
 import multiprocessing as mp
 import os
 import pathlib
+import sys
 
 from collections import Counter
+from contextlib import nullcontext
 
 from .tasks.fetchmgs import call_fetch_mgs as fetchmgs
 from .tasks.mapseq import task as mapseq
@@ -53,6 +55,7 @@ def main():
     ap.add_argument("--min_markers", type=int, default=3)
     ap.add_argument("--min_clusters", type=int, default=2)
     ap.add_argument("--cluster_sizes", type=str)
+    ap.add_argument("--create_workflow_sentinels", action="store_true")
     
     args = ap.parse_args()
 
@@ -143,15 +146,20 @@ def main():
             print("\t".join(line), file=cogs_out)
             specis[line[14]] += 1
 
-    speci_out = open(args.output_dir / f"{args.genome_id}.specI.txt", "wt", encoding='utf-8',)
-    speci_status_out = open(args.output_dir / f"{args.genome_id}.specI.status", "wt", encoding='utf-8',)
+    if args.create_workflow_sentinels:
+        speci_out = open(args.output_dir / f"{args.genome_id}.specI.txt", "wt", encoding='utf-8',)
+        speci_status_out = open(args.output_dir / f"{args.genome_id}.specI.status", "wt", encoding='utf-8',)
+    else:
+        speci_out, speci_status_out = nullcontext(), nullcontext()
 
     with speci_out, speci_status_out:
         speci_counts = specis.most_common()
         print(speci_counts)
         if not speci_counts:
-            print("Warning: could not find any markers. Aborting.")
-            print("NO_MARKERS", file=speci_status_out)
+            if args.create_workflow_sentinels:
+                print("NO_MARKERS", file=speci_status_out)
+
+            logger.warning("Could not find any markers. Aborting.")
         else:
 
             (speci_0, counts_0), *remaining = speci_counts
@@ -163,14 +171,20 @@ def main():
                 print(speci_0, file=speci_out)
                 
                 if accepted_clusters and speci_0 not in accepted_clusters:
-                    print("Warning: specI cluster is too small. Aborting.")
-                    print("SPECI_SIZE_INSUFFICIENT", file=speci_status_out)
+                    if args.create_workflow_sentinels:
+                        print("SPECI_SIZE_INSUFFICIENT", file=speci_status_out)
+                    logger.warning("specI cluster is too small. Aborting.")
                 else:
-                    print("OK", file=speci_status_out)
-                    open(speci_status_out.name + ".OK", "wt", encoding='utf-8').close()
+                    if args.create_workflow_sentinels:
+                        print("OK", file=speci_status_out)
+                    pathlib.Path(speci_status_out.name + ".OK").touch()
             else:
-                print(f"Warning: cannot determine consensus specI. first={speci_0} ({counts_0}) second={speci_1} ({counts_1}). Aborting.")
-                print("NO_CONSENSUS", file=speci_status_out)
+                if args.create_workflow_sentinels:
+                    print("NO_CONSENSUS", file=speci_status_out)
+                warn_params = (speci_0, counts_0, speci_1, counts_1,)
+                logger.warning(
+                    "Cannot determine consensus specI. first=%s (%s) second=%s (%s). Aborting." % warn_params
+                )
 
     # """
     # for cog in \${specicogs[@]}; do
