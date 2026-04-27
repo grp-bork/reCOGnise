@@ -178,7 +178,7 @@ def main():
                     if args.create_workflow_sentinels:
                         print(speci_0, file=speci_out)
                         print("OK", file=speci_status_out)
-                    pathlib.Path(speci_status_out.name + ".OK").touch()
+                        pathlib.Path(speci_status_out.name + ".OK").touch()
 
             else:
                 if args.create_workflow_sentinels:
