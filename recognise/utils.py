@@ -6,7 +6,7 @@ GZIP_MAGIC = b"\x1f\x8b\x08"
 
 def read_fasta(f):
 
-    with open(f) as _in:
+    with open(f, "rb") as _in:
         is_gzipped = _in.read(3) == GZIP_MAGIC
 
     open_f = gzip.open if is_gzipped else open
