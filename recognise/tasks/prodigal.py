@@ -19,7 +19,7 @@ def call_prodigal(genome, protein_file, gene_file, gff_file=None):
                 gene_file,
             ] + gff_params,
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-            check=True, capture_output=True,
+            check=True,
         )
     except subprocess.CalledProcessError as e:
         raise ValueError(f"prodigal: {e.returncode}:\n{e.output}") from e

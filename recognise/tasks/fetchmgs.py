@@ -17,7 +17,7 @@ def call_fetch_mgs(protein_file, gene_file, cog_dir, cpus):
         _ = subprocess.run(
             fetchmgs_cmd,
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-            check=True, capture_output=True,   
+            check=True,
         )
     except subprocess.CalledProcessError as e:
         raise ValueError(f"fetchMGs: {e.returncode}:\n{e.output}") from e

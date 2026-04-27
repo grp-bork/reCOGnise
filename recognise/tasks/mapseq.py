@@ -20,7 +20,7 @@ def call_mapseq(align_file, cog_db, cog, threads=4, speci_header=None):
                 os.path.join(cog_db, f"{cog}.specI.tax"),
             ],
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-            check=True, capture_output=True,
+            check=True,
         )
     except subprocess.CalledProcessError as e:
         msg = f"MAPseq: {e.returncode}:\n{e.output}"
