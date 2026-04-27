@@ -1,12 +1,11 @@
 import itertools as it
-import pathlib
 
 import pyrodigal
 
 
 def read_fasta(f):
     with open(f) as _in:
-        gen = it.groupby(_in.readlines(), key=lambda x:x[0]==">",)
+        gen = it.groupby(_in, key=lambda x:x[0]==">",)
         for is_header, item in gen:
             if is_header:
                 seqid = next(item).rstrip()[1:]
