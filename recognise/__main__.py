@@ -55,7 +55,9 @@ def main():
     ap.add_argument("--min_markers", type=int, default=3)
     ap.add_argument("--min_clusters", type=int, default=2)
     ap.add_argument("--cluster_sizes", type=str)
-    ap.add_argument("--create_workflow_sentinels", action="store_true")
+    ap.add_argument("--with_sentinels", action="store_true")
+    ap.add_argument("--keep_intermediates", action="store_true")
+    
     
     args = ap.parse_args()
 
@@ -98,7 +100,7 @@ def main():
     cog_dir = output_dir / "cogs"
     
     logger.info("Running fetchMGs...")
-    fetchmgs(proteins, genes, cog_dir, args.cpus)
+    fetchmgs(proteins, genes, cog_dir, args.cpus, cleanup=not args.keep_intermediates,)
     logger.info("fetchMGs finished.")
 
     specis = Counter()
@@ -146,7 +148,7 @@ def main():
             print("\t".join(line), file=cogs_out)
             specis[line[14]] += 1
 
-    if args.create_workflow_sentinels:
+    if args.with_sentinels:
         speci_out = open(output_dir / f"{args.genome_id}.specI.txt", "wt", encoding='utf-8',)
         speci_status_out = open(output_dir / f"{args.genome_id}.specI.status", "wt", encoding='utf-8',)
     else:
@@ -156,7 +158,7 @@ def main():
         speci_counts = specis.most_common()
         print(speci_counts)
         if not speci_counts:
-            if args.create_workflow_sentinels:
+            if args.with_sentinels:
                 print("NO_MARKERS", file=speci_status_out)
 
             logger.warning("Could not find any markers. Aborting.")
@@ -169,19 +171,19 @@ def main():
             
             if counts_1 < counts_0 and 3 <= counts_0:
                 if accepted_clusters and speci_0 not in accepted_clusters:
-                    if args.create_workflow_sentinels:
+                    if args.with_sentinels:
                         print("SPECI_SIZE_INSUFFICIENT", file=speci_status_out)
                     logger.warning("specI cluster is too small. Aborting.")
                 else:
 
                     logger.info("Found specI: %s" % speci_0)
-                    if args.create_workflow_sentinels:
+                    if args.with_sentinels:
                         print(speci_0, file=speci_out)
                         print("OK", file=speci_status_out)
                         pathlib.Path(speci_status_out.name + ".OK").touch()
 
             else:
-                if args.create_workflow_sentinels:
+                if args.with_sentinels:
                     print("NO_CONSENSUS", file=speci_status_out)
                 warn_params = (speci_0, counts_0, speci_1, counts_1,)
                 logger.warning(
