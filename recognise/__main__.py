@@ -143,7 +143,14 @@ def main():
         if msg is not None:
             raise ValueError(f"{msg}")
 
-    header = "\t".join(("cog", "query", "dbhit",	"bitscore", "identity",	"matches", "mismatches", "gaps", "query_start", "query_end", "dbhit_start",	"dbhit_end", "strand",	"specI_only:specI_cluster",	"combined_cf", "score_cf",))
+    header = "\t".join(
+        (
+            "cog", "query", "dbhit",	"bitscore", "identity",	"matches", "mismatches",
+            "gaps", "query_start", "query_end", "dbhit_start",	"dbhit_end", "strand",
+            "specI_only:specI_cluster",	"combined_cf", "score_cf",
+        )
+    )
+
     with open(output_dir / f"{args.genome_id}.cogs.txt", "wt") as cogs_out:
         print(
             header, file=cogs_out, flush=True
