@@ -119,49 +119,51 @@ def main():
         if cog_file.is_file() and os.stat(cog_file).st_size:
             tasks.append((cog_file, cog, args.genome_id, pathlib.Path(args.cog_db), min(args.cpus, 4)))
 
-    logger.info(
-        f"Running {args.cpus // min(args.cpus, 4)} MAPseq processes on {len(tasks)} marker genes. "
-        f"marker_set={args.marker_set}..."
-    )
+    if len(tasks) >= args.min_markers:
 
-    with mp.Pool(args.cpus // min(args.cpus, 4)) as pool:
-        # results = list(pool.starmap_async(task, tasks).get())
-        results = [pool.apply_async(mapseq, (task,)) for task in tasks]
-        # list(pool.apply_async(task, tasks).get())
-        results = [res.get() for res in results]
-
-    logger.info("MAPseq finished.")
-
-    # print(results)
-
-    try:
-        messages, output_lines = zip(*results)
-    except ValueError:
-        messages, output_lines = [], []
-
-    for msg in messages:
-        if msg is not None:
-            raise ValueError(f"{msg}")
-
-    header = "\t".join(
-        (
-            "cog", "query", "dbhit",	"bitscore", "identity",	"matches", "mismatches",
-            "gaps", "query_start", "query_end", "dbhit_start",	"dbhit_end", "strand",
-            "specI_only:specI_cluster",	"combined_cf", "score_cf",
-        )
-    )
-
-    with open(output_dir / f"{args.genome_id}.cogs.txt", "wt") as cogs_out:
-        print(
-            header, file=cogs_out, flush=True
+        logger.info(
+            f"Running {args.cpus // min(args.cpus, 4)} MAPseq processes on {len(tasks)} marker genes. "
+            f"marker_set={args.marker_set}..."
         )
 
-        logger.info(header)
+        with mp.Pool(args.cpus // min(args.cpus, 4)) as pool:
+            # results = list(pool.starmap_async(task, tasks).get())
+            results = [pool.apply_async(mapseq, (task,)) for task in tasks]
+            # list(pool.apply_async(task, tasks).get())
+            results = [res.get() for res in results]
 
-        for line in it.chain(*output_lines):
-            print("\t".join(line), file=cogs_out)
-            logger.info("\t".join(line))
-            specis[line[14]] += 1
+        logger.info("MAPseq finished.")
+
+        # print(results)
+
+        try:
+            messages, output_lines = zip(*results)
+        except ValueError:
+            messages, output_lines = [], []
+
+        for msg in messages:
+            if msg is not None:
+                raise ValueError(f"{msg}")
+
+        header = "\t".join(
+            (
+                "cog", "query", "dbhit",	"bitscore", "identity",	"matches", "mismatches",
+                "gaps", "query_start", "query_end", "dbhit_start",	"dbhit_end", "strand",
+                "specI_only:specI_cluster",	"combined_cf", "score_cf",
+            )
+        )
+
+        with open(output_dir / f"{args.genome_id}.cogs.txt", "wt") as cogs_out:
+            print(
+                header, file=cogs_out, flush=True
+            )
+
+            logger.info(header)
+
+            for line in it.chain(*output_lines):
+                print("\t".join(line), file=cogs_out)
+                logger.info("\t".join(line))
+                specis[line[14]] += 1
 
     if args.with_sentinels:
         speci_out = open(output_dir / f"{args.genome_id}.specI.txt", "wt", encoding='utf-8',)
