@@ -81,7 +81,7 @@ def main():
     output_dir.mkdir(exist_ok=True, parents=True)
     
     if genome_present:
-        logger.info("Running prodigal...")
+        logger.info("Running pyrodigal...")
         if genes_present or proteins_present:
             raise ValueError("Please specify either a genome or a gene/protein set combination.")
         
@@ -181,7 +181,7 @@ def main():
             logger.warning("Could not find any markers.")
         
         else:        
-            speci_counts = sorted((c, speci) for speci, c in specis.items())
+            speci_counts = sorted(((c, speci) for speci, c in specis.items()), reverse=True,)
             best_n = [(c, speci) for c, speci in speci_counts if c == speci_counts[0][0] and c >= args.min_markers]
 
             if not best_n:
