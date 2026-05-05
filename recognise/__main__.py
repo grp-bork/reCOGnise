@@ -43,7 +43,7 @@ COGS = {
 
 
 def main():
-    
+
     ap = argparse.ArgumentParser()
     ap.add_argument("genome_id", type=str)
     ap.add_argument("cog_db", type=str)
@@ -59,8 +59,7 @@ def main():
     ap.add_argument("--cluster_sizes", type=str)
     ap.add_argument("--with_sentinels", action="store_true")
     ap.add_argument("--keep_intermediates", action="store_true")
-    
-    
+
     args = ap.parse_args()
 
     genome_present, genes_present, proteins_present = (
@@ -76,20 +75,18 @@ def main():
             for line in open(args.cluster_sizes, "rt", encoding='utf-8')
             if int(line.strip().split("\t")[1]) >= args.min_clusters
         }
-    
+
     output_dir = pathlib.Path(args.output_dir)
     output_dir.mkdir(exist_ok=True, parents=True)
-    
+
     if genome_present:
         logger.info("Running pyrodigal...")
         if genes_present or proteins_present:
             raise ValueError("Please specify either a genome or a gene/protein set combination.")
-        
+
         proteins = output_dir / f"{args.genome_id}.faa"
         genes = output_dir / f"{args.genome_id}.ffn"
-        gff = output_dir / f"{args.genome_id}.gff"
 
-        # prodigal(args.genome, proteins, genes, gff)
         pyrodigal(args.genome, args.genome_id, output_dir)
         logger.info("pyrodigal finished.")
 
@@ -101,7 +98,7 @@ def main():
         raise ValueError("Missing gene set, please specify with --genes.")
 
     cog_dir = output_dir / "cogs"
-    
+
     logger.info("Running fetchMGs...")
     fetchmgs(proteins, genes, cog_dir, args.cpus, cleanup=not args.keep_intermediates,)
     logger.info("fetchMGs finished.")
@@ -117,24 +114,26 @@ def main():
             break
         cog_file = cog_dir / f"{cog}.fna"
         if cog_file.is_file() and os.stat(cog_file).st_size:
-            tasks.append((cog_file, cog, args.genome_id, pathlib.Path(args.cog_db), min(args.cpus, 4)))
+            tasks.append(
+                (
+                    cog_file, cog, args.genome_id,
+                    pathlib.Path(args.cog_db), min(args.cpus, 4)
+                )
+            )
 
     if len(tasks) >= args.min_markers:
 
         logger.info(
-            f"Running {args.cpus // min(args.cpus, 4)} MAPseq processes on {len(tasks)} marker genes. "
+            f"Running {args.cpus // min(args.cpus, 4)} "
+            f"MAPseq processes on {len(tasks)} marker genes. "
             f"marker_set={args.marker_set}..."
         )
 
         with mp.Pool(args.cpus // min(args.cpus, 4)) as pool:
-            # results = list(pool.starmap_async(task, tasks).get())
             results = [pool.apply_async(mapseq, (task,)) for task in tasks]
-            # list(pool.apply_async(task, tasks).get())
             results = [res.get() for res in results]
 
         logger.info("MAPseq finished.")
-
-        # print(results)
 
         try:
             messages, output_lines = zip(*results)
@@ -166,30 +165,38 @@ def main():
                 specis[line[14]] += 1
 
     if args.with_sentinels:
-        speci_out = open(output_dir / f"{args.genome_id}.specI.txt", "wt", encoding='utf-8',)
-        speci_status_out = open(output_dir / f"{args.genome_id}.specI.status", "wt", encoding='utf-8',)
+        speci_out = open(
+            output_dir / f"{args.genome_id}.specI.txt",
+            "wt", encoding='utf-8',
+        )
+        speci_status_out = open(
+            output_dir / f"{args.genome_id}.specI.status",
+            "wt", encoding='utf-8',
+        )
     else:
         speci_out, speci_status_out = nullcontext(), nullcontext()
 
     with speci_out, speci_status_out:
-        # speci_counts = specis.most_common()
-        
         if not specis:
             if args.with_sentinels:
                 print("NO_MARKERS", file=speci_status_out)
 
             logger.warning("Could not find any markers.")
-        
-        else:        
+
+        else:
             speci_counts = sorted(((c, speci) for speci, c in specis.items()), reverse=True,)
-            best_n = [(c, speci) for c, speci in speci_counts if c == speci_counts[0][0] and c >= args.min_markers]
+            best_n = [
+                (c, speci)
+                for c, speci in speci_counts
+                if c == speci_counts[0][0] and c >= args.min_markers
+            ]
 
             if not best_n:
                 if args.with_sentinels:
                     print("NOT_ENOUGH_MARKER_SUPPORT", file=speci_status_out)
 
                 logger.warning("There is not enough marker support.")
-            
+
             elif len(best_n) > 1:
                 if args.with_sentinels:
                     print("NO_CONSENSUS", file=speci_status_out)
@@ -208,11 +215,15 @@ def main():
                     ]
 
                     if not best_hits or best_hits[0] != best_n[0]:
-                        logger.warning("specI with most marker support is %s (%s / %s markers), but cluster is too small." % (best_n[0][1], best_n[0][0], len(tasks),))
+                        logger.warning(
+                            "specI with most marker support is %s (%s / %s markers), but cluster is too small." % (best_n[0][1], best_n[0][0], len(tasks),)
+                        )
 
                         if best_hits:
                             for c, speci in best_hits:
-                                logger.info("Alternative specI: %s (%s / %s markers)" % (speci, c, len(tasks),))
+                                logger.info(
+                                    "Alternative specI: %s (%s / %s markers)" % (speci, c, len(tasks),)
+                                )
                         else:
                             logger.warning("No alternatives found.")
 
@@ -221,7 +232,9 @@ def main():
                         # logger.warning("No specI cluster found with size > 2.")
 
                     else:
-                        logger.info("Identified specI: %s (%s / %s markers)" % (best_hits[0][1], best_hits[0][0], len(tasks),))
+                        logger.info(
+                            "Identified specI: %s (%s / %s markers)" % (best_hits[0][1], best_hits[0][0], len(tasks),)
+                        )
                         for c, speci in best_hits[1:]:
                             logger.info("Alternative specI: %s (%s / %s markers)" % (speci, c, len(tasks),))
 
@@ -283,7 +296,7 @@ def main():
         #     speci_1, counts_1 = None, 0
         #     if remaining:
         #         (speci_1, counts_1), *remaining = remaining
-            
+
         #     if counts_1 < counts_0 and 3 <= counts_0:
         #         if accepted_clusters and speci_0 not in accepted_clusters:
         #             if args.with_sentinels:
@@ -322,9 +335,7 @@ def main():
     # 		fi
     # 	done
     # """
-        
-    
-    
+
 
 if __name__ == "__main__":
     main()

@@ -1,3 +1,5 @@
+""" Utility functions """
+
 import gzip
 import itertools as it
 
@@ -5,6 +7,7 @@ import itertools as it
 GZIP_MAGIC = b"\x1f\x8b\x08"
 
 def read_fasta(f):
+    """ Read fasta file. """
 
     with open(f, "rb") as _in:
         is_gzipped = _in.read(3) == GZIP_MAGIC
@@ -18,7 +21,3 @@ def read_fasta(f):
                 seqid = next(item).rstrip()[1:]
                 _, seqs = next(gen)
                 yield seqid, "".join(s.rstrip() for s in seqs)
-
-
-
-    

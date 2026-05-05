@@ -1,3 +1,6 @@
+# pylint: disable=E0401
+""" Module to add pyrodigal gene calling functionality """
+
 import pyrodigal
 
 from ..utils import read_fasta
