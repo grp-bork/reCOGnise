@@ -221,7 +221,10 @@ def main():
                         # logger.warning("No specI cluster found with size > 2.")
 
                     else:
-                        logger.info("Identified specI: %s (%s / %s markers)" % (best_n[0][1], best_n[0][0], len(tasks),))
+                        logger.info("Identified specI: %s (%s / %s markers)" % (best_hits[0][1], best_hits[0][0], len(tasks),))
+                        for c, speci in best_hits[1:]:
+                            logger.info("Alternative specI: %s (%s / %s markers)" % (speci, c, len(tasks),))
+
 
                         if args.with_sentinels:
                             print(best_n[0][1], file=speci_out)
@@ -232,7 +235,16 @@ def main():
                             shutil.rmtree(cog_dir)
 
                 else:
-                    logger.info("Identified specI: %s (%s / %s markers)" % (best_n[0][1], best_n[0][0], len(tasks),))
+
+                    best_hits = [
+                        (c, speci)
+                        for c, speci in speci_counts
+                        if c >= args.min_markers
+                    ]
+
+                    logger.info("Identified specI: %s (%s / %s markers)" % (best_hits[0][1], best_hits[0][0], len(tasks),))
+                    for c, speci in best_hits[1:]:
+                        logger.info("Alternative specI: %s (%s / %s markers)" % (speci, c, len(tasks),))
 
                     if args.with_sentinels:
                         print(best_n[0][1], file=speci_out)
