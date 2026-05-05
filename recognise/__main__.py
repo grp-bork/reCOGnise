@@ -91,7 +91,7 @@ def main():
 
         # prodigal(args.genome, proteins, genes, gff)
         pyrodigal(args.genome, args.genome_id, output_dir)
-        logger.info("prodigal finished.")
+        logger.info("pyrodigal finished.")
 
     elif genes_present and proteins_present:
         genes, proteins = args.genes, args.proteins
