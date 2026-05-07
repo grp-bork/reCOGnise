@@ -1,0 +1,34 @@
+""" Module to add prodigal gene calling """
+import subprocess
+
+
+def call_prodigal(genome, protein_file, gene_file, gff_file):
+    """ Call prodigal from command line """
+    # prodigal -i \$(basename ${genome_fna} .gz) -f gff -o ${genome_id}/${genome_id}.gff -a ${genome_id}/${genome_id}.faa -d ${genome_id}/${genome_id}.ffn
+    # prodigal -i \$(basename \$genome_file .gz) -f gff -o prodigal/\$genome_id/\$genome_id.gff -a prodigal/\$genome_id/\$genome_id.faa -d prodigal/\$genome_id/\$genome_id.ffn
+
+    cmd = [
+		"prodigal",
+		"-i",
+		genome,
+		"-a",
+		protein_file,
+		"-d",
+		gene_file,
+        "-f",
+        "gff",
+        "-o",
+        gff_file,
+	]
+
+    try:
+        _ = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            check=True,
+        )
+    except subprocess.CalledProcessError as e:
+        raise ValueError(f"prodigal: {e.returncode}:\n{e.output}") from e
+
+    # if prodigal_proc.returncode != 0:
+    #     raise ValueError(f"<pre>Prodigal error\n\n{prodigal_proc.stdout}</pre>")
