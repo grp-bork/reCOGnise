@@ -10,7 +10,10 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt update
 RUN apt upgrade -y
 
-RUN apt install -y wget python3-pip git dirmngr gnupg ca-certificates build-essential libssl-dev libcurl4-gnutls-dev libxml2-dev libfontconfig1-dev libharfbuzz-dev libfribidi-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev prodigal
+RUN apt install -y wget python3-pip git 
+# prodigal
+# dirmngr gnupg ca-certificates build-essential 
+#libssl-dev libcurl4-gnutls-dev libxml2-dev libfontconfig1-dev libharfbuzz-dev libfribidi-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev
 RUN apt clean
 
   
@@ -24,9 +27,9 @@ RUN mkdir -p /opt/software && \
 	ln -s /opt/software/mapseq/share /usr/bin/
 
 RUN cd /opt/software && \
-	git clone https://github.com/cschu/fetchMGs.git fetchMGs && \
+	git clone -b update/pyhmmer_0.12.0_20260427 https://github.com/cschu/fetchMGs.git fetchMGs && \
 	cd fetchMGs && \
-	pip install --no-deps .
+	pip install .
 
 ARG RECOGNISE_GUARD=1
 RUN cd /opt/software && \
