@@ -33,7 +33,7 @@ RUN cd /opt/software && \
 
 ARG RECOGNISE_GUARD=1
 RUN cd /opt/software && \
-	git clone https://github.com/grp-bork/reCOGnise.git && \
+	git clone -b quickfix/default_sentinels_20260520 https://github.com/grp-bork/reCOGnise.git && \
 	cd reCOGnise && \
 	pip install .
 
