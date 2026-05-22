@@ -55,10 +55,12 @@ def main():
     ap.add_argument("--min_markers", type=int, default=3)
     ap.add_argument("--min_clusters", type=int, default=2)
     ap.add_argument("--cluster_sizes", type=str)
-    ap.add_argument("--with_sentinels", action="store_true")
+    ap.add_argument("--no_sentinels", action="store_true")
     ap.add_argument("--keep_intermediates", action="store_true")
 
     args = ap.parse_args()
+
+    with_sentinels = not args.no_sentinels
 
     genome_present, genes_present, proteins_present = (
         f is not None and pathlib.Path(f).is_file()
@@ -162,7 +164,7 @@ def main():
                 logger.info("\t".join(line))
                 specis[line[14]] += 1
 
-    if args.with_sentinels:
+    if with_sentinels:
         speci_out = open(
             output_dir / f"{args.genome_id}.specI.txt",
             "wt", encoding='utf-8',
@@ -176,7 +178,7 @@ def main():
 
     with speci_out, speci_status_out:
         if not specis:
-            if args.with_sentinels:
+            if with_sentinels:
                 print("NO_MARKERS", file=speci_status_out)
 
             logger.warning("Could not find any markers.")
@@ -190,13 +192,13 @@ def main():
             ]
 
             if not best_n:
-                if args.with_sentinels:
+                if with_sentinels:
                     print("NOT_ENOUGH_MARKER_SUPPORT", file=speci_status_out)
 
                 logger.warning("There is not enough marker support.")
 
             elif len(best_n) > 1:
-                if args.with_sentinels:
+                if with_sentinels:
                     print("NO_CONSENSUS", file=speci_status_out)
                 warn_params = ";".join(f"{speci}={c}" for c, speci in best_n)
                 logger.warning(
@@ -225,7 +227,7 @@ def main():
                         else:
                             logger.warning("No alternatives found.")
 
-                        if args.with_sentinels:
+                        if with_sentinels:
                             print("SPECI_SIZE_INSUFFICIENT", file=speci_status_out)
                         # logger.warning("No specI cluster found with size > 2.")
 
@@ -237,7 +239,7 @@ def main():
                             logger.info("Alternative specI: %s (%s / %s markers)" % (speci, c, len(tasks),))
 
 
-                        if args.with_sentinels:
+                        if with_sentinels:
                             print(best_n[0][1], file=speci_out)
                             print("OK", file=speci_status_out)
                             pathlib.Path(speci_status_out.name + ".OK").touch()
@@ -257,7 +259,7 @@ def main():
                     for c, speci in best_hits[1:]:
                         logger.info("Alternative specI: %s (%s / %s markers)" % (speci, c, len(tasks),))
 
-                    if args.with_sentinels:
+                    if with_sentinels:
                         print(best_n[0][1], file=speci_out)
                         print("OK", file=speci_status_out)
                         pathlib.Path(speci_status_out.name + ".OK").touch()
@@ -266,7 +268,7 @@ def main():
                         shutil.rmtree(cog_dir)
 
                 # if accepted_clusters and speci_0 not in accepted_clusters:
-                #     if args.with_sentinels:
+                #     if with_sentinels:
                 #         print("SPECI_SIZE_INSUFFICIENT", file=speci_status_out)
                 #     logger.warning("specI cluster is too small. Aborting.")
                 # else:
@@ -274,7 +276,7 @@ def main():
                 #     logger.info("Identified specI: %s (%s / %s markers)" % (speci_0, counts_0, len(tasks),))
                 #     if counts_1:
                 #         logger.info("Runner-up: %s (%s / %s markers)" % (speci_1, counts_1, len(tasks),))
-                #     if args.with_sentinels:
+                #     if with_sentinels:
                 #         print(speci_0, file=speci_out)
                 #         print("OK", file=speci_status_out)
                 #         pathlib.Path(speci_status_out.name + ".OK").touch()
@@ -284,7 +286,7 @@ def main():
 
         # print(speci_counts)
         # if not speci_counts:
-        #     if args.with_sentinels:
+        #     if with_sentinels:
         #         print("NO_MARKERS", file=speci_status_out)
 
         #     logger.warning("Could not find any markers. Aborting.")
@@ -297,7 +299,7 @@ def main():
 
         #     if counts_1 < counts_0 and 3 <= counts_0:
         #         if accepted_clusters and speci_0 not in accepted_clusters:
-        #             if args.with_sentinels:
+        #             if with_sentinels:
         #                 print("SPECI_SIZE_INSUFFICIENT", file=speci_status_out)
         #             logger.warning("specI cluster is too small. Aborting.")
         #         else:
@@ -305,7 +307,7 @@ def main():
         #             logger.info("Identified specI: %s (%s / %s markers)" % (speci_0, counts_0, len(tasks),))
         #             if counts_1:
         #                 logger.info("Runner-up: %s (%s / %s markers)" % (speci_1, counts_1, len(tasks),))
-        #             if args.with_sentinels:
+        #             if with_sentinels:
         #                 print(speci_0, file=speci_out)
         #                 print("OK", file=speci_status_out)
         #                 pathlib.Path(speci_status_out.name + ".OK").touch()
@@ -314,7 +316,7 @@ def main():
         #                 shutil.rmtree(cog_dir)
 
         #     else:
-        #         if args.with_sentinels:
+        #         if with_sentinels:
         #             print("NO_CONSENSUS", file=speci_status_out)
         #         warn_params = (speci_0, counts_0, speci_1, counts_1,)
         #         logger.warning(
