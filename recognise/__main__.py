@@ -55,12 +55,12 @@ def main():
     ap.add_argument("--min_markers", type=int, default=3)
     ap.add_argument("--min_clusters", type=int, default=2)
     ap.add_argument("--cluster_sizes", type=str)
-    ap.add_argument("--no_sentinels", action="store_true")
+    ap.add_argument("--with_sentinels", action="store_true")
     ap.add_argument("--keep_intermediates", action="store_true")
 
     args = ap.parse_args()
 
-    with_sentinels = not args.no_sentinels
+    with_sentinels = args.with_sentinels
 
     genome_present, genes_present, proteins_present = (
         f is not None and pathlib.Path(f).is_file()

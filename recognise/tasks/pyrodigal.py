@@ -21,7 +21,7 @@ def run_pyrodigal(f, genome_id, output_dir):
 
     with faa_out, ffn_out, gff_out:
         for sid, seq in zip(ids, seqs):
-            sid = sid[:sid.find(" ")]
+            sid = sid.split(" ")[0]
             genes = gf.find_genes(seq)
             genes.write_translations(faa_out, sid)
             genes.write_genes(ffn_out, sid)
